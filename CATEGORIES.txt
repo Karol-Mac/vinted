@@ -1,0 +1,47 @@
+{
+    "name": "Leggings"
+}
+
+{
+    "name": "Chinos"
+}
+
+{
+    "name": "Hoodie"
+}
+
+{
+    "name": "Shorts"
+}
+
+{
+    "name": "Sweater"
+}
+
+{
+    "name": "Jacket"
+}
+
+{
+    "name": "Dress"
+}
+
+{
+    "name": "T-Shirt"
+}
+
+{
+    "name": "Jeans"
+}
+
+{
+    "name": "Skirt"
+}
+
+{
+    "name": "Coat"
+}
+
+{
+    "name": "Blouse"
+}
