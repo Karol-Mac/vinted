@@ -5,9 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.modelmapper.internal.bytebuddy.dynamic.loading.InjectionClassLoader;
 
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -40,5 +38,4 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Clothe> myClothes;
-
 }

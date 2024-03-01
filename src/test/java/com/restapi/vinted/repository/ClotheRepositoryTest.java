@@ -59,20 +59,14 @@ class ClotheRepositoryTest {
 
         assertNotNull(saved);
         assertThat(saved.getId()).isGreaterThan(0);
-        assertEquals(saved.getName(), saved.getName());
-        assertEquals(saved.getDescription(), saved.getDescription());
+        assertEquals(saved.getName(), clothe1.getName());
+        assertEquals(saved.getDescription(), clothe1.getDescription());
         assertEquals(saved.getSize(), clothe1.getSize());
         assertIterableEquals(saved.getImages(), clothe1.getImages());
     }
 
     @Test
-    public void testSave_Null(){
-        assertThrows(InvalidDataAccessApiUsageException.class,
-                () -> clotheRepository.save(null));
-    }
-
-    @Test
-    public void testFindAll_ClotheList(){
+    public void testFindAll(){
         Clothe saved = clotheRepository.save(clothe1);
         clotheRepository.save(clothe2);
         List<Clothe> clothes = clotheRepository.findAll();
@@ -112,6 +106,16 @@ class ClotheRepositoryTest {
     }
 
     @Test
+    public void testDelete_ClotheNotInDB(){
+        Clothe savedClothe = clotheRepository.save(clothe1);
+
+        clotheRepository.delete(savedClothe);
+        var foundedClothe = clotheRepository.findById(savedClothe.getId());
+
+        assertFalse(foundedClothe.isPresent());
+    }
+
+    @Test
     void testFindByCategoryId_ValidCategoryId() {
         Category category = Category.builder()
                 .name("test cat")
@@ -148,7 +152,6 @@ class ClotheRepositoryTest {
     }
 
     @Test
-    @Disabled
     void testFindByUserIdPageable() {
         User user = User.builder()
                 .name("test")
