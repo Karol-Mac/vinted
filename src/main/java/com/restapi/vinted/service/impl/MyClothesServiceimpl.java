@@ -139,10 +139,10 @@ public class MyClothesServiceimpl implements MyClothesService {
     }
 
     private User getUser(){
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String usernameOrEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        return userRepository.findByEmail(email).orElseThrow(
-                () -> new UsernameNotFoundException("User not found with username or email: "+ email)
+        return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).orElseThrow(
+                () -> new UsernameNotFoundException("User not found with username or usernameOrEmail: "+ usernameOrEmail)
         );
     }
 
