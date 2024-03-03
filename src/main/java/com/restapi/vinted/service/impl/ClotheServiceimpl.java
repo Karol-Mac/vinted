@@ -66,7 +66,7 @@ public class ClotheServiceimpl implements ClotheService {
         Clothe clothe = clotheRepository.findById(clotheId)
                 .orElseThrow( ()-> new ResourceNotFoundException("Clothe", "id", clotheId));
 
-        if(!(clothe.getCategory().getId() == category.getId()))
+        if(clothe.getCategory().getId() != category.getId())
             throw new ApiException(HttpStatus.BAD_REQUEST, "Clothe does not belong to this category");
 
         return mapToDto(clothe);
