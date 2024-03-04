@@ -1,7 +1,6 @@
 package com.restapi.vinted.service.impl;
 
 import com.restapi.vinted.entity.Category;
-import com.restapi.vinted.entity.Clothe;
 import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.payload.CategoryDto;
 import com.restapi.vinted.repository.CategoryRepository;

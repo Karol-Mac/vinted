@@ -3,8 +3,6 @@ package com.restapi.vinted.service;
 import com.restapi.vinted.payload.ClotheDto;
 import com.restapi.vinted.payload.ClotheResponse;
 
-import java.security.Principal;
-
 public interface MyClothesService {
     ClotheDto createClothe(ClotheDto clotheDto);
     ClotheDto getClotheById(long id);

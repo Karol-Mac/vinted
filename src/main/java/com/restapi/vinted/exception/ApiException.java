@@ -1,7 +1,9 @@
 package com.restapi.vinted.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 public class ApiException extends RuntimeException {
 
     private final HttpStatus status;
@@ -11,10 +13,5 @@ public class ApiException extends RuntimeException {
         super(message);
         this.status = status;
         this.message = message;
-    }
-
-    @Override
-    public String getMessage() {
-        return message;
     }
 }

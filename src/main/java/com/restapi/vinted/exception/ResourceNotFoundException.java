@@ -1,8 +1,10 @@
 package com.restapi.vinted.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+@Getter
 @ResponseStatus(code = HttpStatus.NOT_FOUND)
 public class ResourceNotFoundException extends RuntimeException {
 
@@ -15,17 +17,5 @@ public class ResourceNotFoundException extends RuntimeException {
         this.resource = resource;
         this.fieldName = fieldName;
         this.value = value;
-    }
-
-    public String getResource() {
-        return resource;
-    }
-
-    public String getFieldName() {
-        return fieldName;
-    }
-
-    public long getValue() {
-        return value;
     }
 }
