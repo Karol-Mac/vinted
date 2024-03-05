@@ -1,4 +1,4 @@
-package com.restapi.vinted.service.impl;
+package com.restapi.vinted.service;
 
 import com.restapi.vinted.entity.Category;
 import com.restapi.vinted.entity.Clothe;
@@ -8,6 +8,7 @@ import com.restapi.vinted.payload.ClotheDto;
 import com.restapi.vinted.payload.ClotheResponse;
 import com.restapi.vinted.repository.CategoryRepository;
 import com.restapi.vinted.repository.ClotheRepository;
+import com.restapi.vinted.service.impl.ClotheServiceimpl;
 import com.restapi.vinted.utils.ClotheSize;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
