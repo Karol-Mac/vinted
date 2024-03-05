@@ -41,7 +41,6 @@ public class MyClothesServiceimpl implements MyClothesService {
 
     @Override
     public ClotheDto createClothe(ClotheDto clotheDto) {
-
         //getting logged-in user
         User user = getUser();
 
@@ -50,7 +49,6 @@ public class MyClothesServiceimpl implements MyClothesService {
 
         //saving new clothe in DB
         Clothe savedClothe = clotheRepository.save(clothe);
-
         return mapToDto(savedClothe);
     }
 
