@@ -31,6 +31,8 @@ public class MyClothesServiceimpl implements MyClothesService {
 
     UserRepository userRepository;
 
+    public final static String NOT_OWNER = "You are not the owner of this clothe";
+
     public MyClothesServiceimpl(ClotheRepository clotheRepository,
                                 ModelMapper mapper, UserRepository userRepository) {
         this.clotheRepository = clotheRepository;
@@ -61,9 +63,8 @@ public class MyClothesServiceimpl implements MyClothesService {
         List<Clothe> clothes = clotheRepository.findByUserId(user.getId());
 
         //filtering the "chosen one", by given ID
-        Clothe clothe = clothes.stream().filter(clothing -> clothing.getId()==id).findAny()
-                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED,
-                                "You are not the owner of this clothe")
+        Clothe clothe = clothes.stream().filter(clo -> clo.getId()==id).findAny()
+                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, NOT_OWNER)
                 );
 
         return mapToDto(clothe);
@@ -103,8 +104,7 @@ public class MyClothesServiceimpl implements MyClothesService {
     public ClotheDto updateClothe(long id, ClotheDto clotheDto) {
         Clothe clothe = getClotheFromDB(id);
 
-        if(!clothe.getUser().equals(getUser()))
-            throw new ApiException(HttpStatus.UNAUTHORIZED, "You are not the owner of this clothe");
+        isOwner(clothe);
 
         clothe.setName(clotheDto.getName());
 
@@ -122,8 +122,7 @@ public class MyClothesServiceimpl implements MyClothesService {
     public String deleteClothe(long id) {
         Clothe clothe = getClotheFromDB(id);
 
-        if(!clothe.getUser().equals(getUser()))
-            throw new ApiException(HttpStatus.UNAUTHORIZED, "You are not the owner of this clothe");
+        isOwner(clothe);
 
         clotheRepository.delete(clothe);
 
@@ -135,6 +134,12 @@ public class MyClothesServiceimpl implements MyClothesService {
                 () -> new ResourceNotFoundException("Clothe", "id", id)
         );
     }
+
+    private void isOwner(Clothe clothe){
+        if(!clothe.getUser().equals(getUser()))
+            throw new ApiException(HttpStatus.UNAUTHORIZED, NOT_OWNER);
+    }
+
 
     private User getUser(){
         String usernameOrEmail = SecurityContextHolder.getContext().getAuthentication().getName();

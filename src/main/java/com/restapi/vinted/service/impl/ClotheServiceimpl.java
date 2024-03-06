@@ -17,6 +17,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+
 @Service
 public class ClotheServiceimpl implements ClotheService {
 
@@ -48,6 +50,7 @@ public class ClotheServiceimpl implements ClotheService {
 
         //Create ClotheResponse - give more info to client
         ClotheResponse clotheResponse = new ClotheResponse();
+        clotheResponse.setClothes(new ArrayList<>());
 
         clotheResponse.setClothes(clothes.stream().map(this::mapToDto).toList());
         clotheResponse.setPageNo(clothes.getNumber());

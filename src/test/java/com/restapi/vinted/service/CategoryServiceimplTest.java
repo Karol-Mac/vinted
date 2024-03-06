@@ -12,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,19 +20,18 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-//fixme: zmienić nazwy testów według metodologi given-when-then
-//                                      (więcej na gpt)
-//ten sam refactor zrobić rzecz jasna w innych klasach testowych
+//fixme: uszczegółowić sprawdzanie wyjątków - tak jak w metodzie
+//                                  gicenInvalidClotheId_whenGetClotheById_thenClotheIsRetrived
+//                                  (w klasie MyClothesServiceimplTest)
 
-
-@ExtendWith({MockitoExtension.class, SpringExtension.class})
+@ExtendWith(MockitoExtension.class)
 class CategoryServiceimplTest {
 
     @Mock
     private CategoryRepository categoryRepository;
 
     @Mock
-    ModelMapper modelMapper;
+    private ModelMapper modelMapper;
 
     @InjectMocks
     private CategoryServiceimpl categoryServiceimpl;
@@ -52,7 +50,7 @@ class CategoryServiceimplTest {
     }
 
     @Test
-    void testCreateCategory_ValidCategoryDto(){
+    void givenValidCategoryDto_whenCreateCategory_thenCategoryIsSaved(){
         when(modelMapper.map(categoryDto, Category.class)).thenReturn(category);
         when(categoryRepository.save(category)).thenReturn(category);
         when(modelMapper.map(category, CategoryDto.class)).thenReturn(categoryDto);
@@ -67,7 +65,7 @@ class CategoryServiceimplTest {
     }
 
     @Test
-    void testCreateCategory_NullCategoryDto(){
+    void givenNullCategoryDto_whenCreateCategory_thenIllegalArgumentExceptionIsThrown(){
         when(modelMapper.map(null, Category.class))
                 .thenThrow(IllegalArgumentException.class);
 
@@ -81,7 +79,7 @@ class CategoryServiceimplTest {
     }
 
     @Test
-    void testGetCategory_ValidCategoryId() {
+    void givenValidCateggoryId_whenGetCategory_thenCategoryIsRertived(){
         when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
         when(modelMapper.map(category, CategoryDto.class)).thenReturn(categoryDto);
 
@@ -95,7 +93,7 @@ class CategoryServiceimplTest {
     }
 
     @Test
-    void testGetCategory_InvalidCategoryId() {
+    void givenInvalidCateggoryId_whenGetCategory_thenResourceNotFoundExceptionIsThrown(){
         when(categoryRepository.findById(0L)).thenThrow(ResourceNotFoundException.class);
 
         assertThrows(ResourceNotFoundException.class,
@@ -105,7 +103,7 @@ class CategoryServiceimplTest {
     }
 
     @Test
-    void testGetAllCategories() {
+    void whenGetAllCategories_thenListOfCategoriesIsRetrieved(){
         when(categoryRepository.findAll()).thenReturn(List.of(category));
         when(modelMapper.map(category, CategoryDto.class)).thenReturn(categoryDto);
 
@@ -119,7 +117,7 @@ class CategoryServiceimplTest {
     }
 
     @Test
-    void testUpdateCategory_ValidCategoryIdAndCategoryDto() {
+    void givenCategoryIdAndCategoryDto_whenUpdateCategory_thenCategoryIsUpdated(){
         String oldName = "old name";
         String updatedName = "updated name";
         categoryDto.setName(updatedName);
@@ -139,7 +137,7 @@ class CategoryServiceimplTest {
     }
 
     @Test
-    void testUpdateCategory_InvalidCategoryId() {
+    void givenInvalidCategoryId_whenUpdateCategory_thenResourceNotFoundExceptionIsThrown(){
         when(categoryRepository.findById(anyLong())).thenThrow(ResourceNotFoundException.class);
 
 
@@ -151,7 +149,7 @@ class CategoryServiceimplTest {
     }
 
     @Test
-    void testDeleteCategory_ValidCategoryId() {
+    void givenValidCategoryId_whenDeleteCategory_thenCategoryIsDeleted(){
         when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
 
         categoryServiceimpl.deleteCategory(category.getId());
@@ -161,7 +159,7 @@ class CategoryServiceimplTest {
     }
 
     @Test
-    void testDeleteCategory_InvalidCategoryId() {
+    void givenInalidCategoryId_whenDeleteCategory_thenResourceNotFoundExceptionIsThrown(){
         when(categoryRepository.findById(anyLong())).thenThrow(ResourceNotFoundException.class);
 
         assertThrows(ResourceNotFoundException.class,
