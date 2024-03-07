@@ -85,19 +85,16 @@ public class MyClothesServiceimpl implements MyClothesService {
         //getting page of clothes owned by logged-in user
         Page<Clothe> clothes = clotheRepository.findByUserId(user.getId(), page);
 
-        List<ClotheDto> clothesDto = clothes.stream().map(this::mapToDto).toList();
-
         //creating ClotheResponse - bring more information about clothes to client
         ClotheResponse clotheResponse = new ClotheResponse();
 
-        clotheResponse.setClothes(clothesDto);
+        clotheResponse.setClothes(clothes.stream().map(this::mapToDto).toList());
         clotheResponse.setPageNo(pageNo);
         clotheResponse.setTotalPages(clothes.getTotalPages());
         clotheResponse.setPageSize(pageSize);
         clotheResponse.setLast(clothes.isLast());
 
         return clotheResponse;
-
     }
 
     @Override

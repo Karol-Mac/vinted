@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -26,7 +27,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 //todo: dokończyć testy dla tej klasy!
@@ -140,6 +140,39 @@ class MyClothesServiceimplTest {
         verify(clotheRepository, times(1)).findByUserId(user.getId());
         verify(modelMapper, never()).map(clothe, ClotheDto.class);
     }
+
+
+    @Test
+    @WithMockUser(username = USERNAME)
+    //IS THERE "ANTY" METHOD TO THIS?
+    // No, paggination params cannot be wrong, they have default value
+    void whenGetClothes_thenListOfClothesIsRetrived(){
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("name").ascending());
+        Page<Clothe> page = new PageImpl<>(List.of(clothe), pageable, 1);
+
+        when(userRepository.findByUsernameOrEmail(user.getUsername(), user.getUsername()))
+                .thenReturn(Optional.of(user));
+        when(clotheRepository.findByUserId(user.getId(), pageable)).thenReturn(page);
+        when(modelMapper.map(clothe, ClotheDto.class)).thenReturn(clotheDto);
+
+        var clothes = clothesServiceimpl
+                .getClothes(0, 10, "name", "asc");
+
+        assertNotNull(clothes);
+        assertTrue(clothes.getClothes().contains(clotheDto));
+        verify(userRepository, times(1)).findByUsernameOrEmail(user.getUsername(), user.getUsername());
+        verify(clotheRepository, times(1)).findByUserId(user.getId(), pageable);
+        verify(modelMapper, times(1)).map(clothe, ClotheDto.class);
+    }
+
+
+    @Test
+    @WithMockUser(username = USERNAME)
+    void givenClotheDtoAndId_whenUpdateClothe_thenClotheIsUpdated(){
+        when(userRepository.findByUsernameOrEmail(user.getUsername(), user.getUsername()))
+                .thenReturn(Optional.of(user));
+    }
+
 
 }
 
