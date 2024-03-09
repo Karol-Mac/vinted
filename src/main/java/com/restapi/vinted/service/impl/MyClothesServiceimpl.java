@@ -105,8 +105,7 @@ public class MyClothesServiceimpl implements MyClothesService {
 
         clothe.setName(clotheDto.getName());
 
-        clothe.setDescription(Objects.isNull(clotheDto.getDescription()) ?
-                clothe.getDescription() : clotheDto.getDescription());
+        clothe.setDescription(clotheDto.getDescription());
 
         clothe.setPrice(clotheDto.getPrice());
         clothe.setSize(clotheDto.getSize());

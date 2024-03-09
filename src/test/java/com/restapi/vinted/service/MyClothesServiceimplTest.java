@@ -4,6 +4,7 @@ import com.restapi.vinted.entity.Clothe;
 import com.restapi.vinted.entity.Role;
 import com.restapi.vinted.entity.User;
 import com.restapi.vinted.exception.ApiException;
+import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.payload.ClotheDto;
 import com.restapi.vinted.repository.ClotheRepository;
 import com.restapi.vinted.repository.UserRepository;
@@ -29,7 +30,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-//todo: dokończyć testy dla tej klasy!
+//todo: dokończyć testy dla tej klasy - zostało tylko delete :D
 @ExtendWith({MockitoExtension.class, SpringExtension.class})
 class MyClothesServiceimplTest {
     @Mock
@@ -126,7 +127,7 @@ class MyClothesServiceimplTest {
 
     @Test
     @WithMockUser(username = USERNAME)
-    void gicenInvalidClotheId_whenGetClotheById_thenClotheIsRetrived(){
+    void gicenInvalidClotheId_whenGetClotheById_thenApiExceptionIsThrown(){
         when(userRepository.findByUsernameOrEmail(user.getUsername(), user.getUsername()))
                 .thenReturn(Optional.of(user));
         when(clotheRepository.findByUserId(user.getId())).thenReturn(List.of(clothe));
@@ -169,9 +170,84 @@ class MyClothesServiceimplTest {
     @Test
     @WithMockUser(username = USERNAME)
     void givenClotheDtoAndId_whenUpdateClothe_thenClotheIsUpdated(){
+        clotheDto.setPrice(clotheDto.getPrice().add(BigDecimal.valueOf(15)));
+        clotheDto.setName(clotheDto.getName() + " updated!");
+
+        when(clotheRepository.findById(clothe.getId())).thenReturn(Optional.of(clothe));
+        when(userRepository.findByUsernameOrEmail(user.getUsername(), user.getUsername()))
+                                                            .thenReturn(Optional.of(user));
+        when(clotheRepository.save(clothe)).thenReturn(clothe);
+        when(modelMapper.map(clothe, ClotheDto.class)).thenReturn(clotheDto);
+
+
+
+        var updatedClotheDto = clothesServiceimpl.updateClothe(clothe.getId(), clotheDto);
+
+        assertNotNull(updatedClotheDto);
+        assertEquals(updatedClotheDto.getName(), clothe.getName());
+        assertEquals(updatedClotheDto.getPrice(), clothe.getPrice());
+        verify(clotheRepository, times(1)).findById(clothe.getId());
+        verify(userRepository, times(1)).findByUsernameOrEmail(user.getUsername(), user.getUsername());
+        verify(clotheRepository, times(1)).save(clothe);
+        verify(modelMapper, times(1)).map(clothe, ClotheDto.class);
+    }
+
+    @Test
+    void givenInvalidClotheId_whenUpdateClothe_thenResourceNotFoundExceptionItThrown(){
+        clotheDto.setPrice(clotheDto.getPrice().add(BigDecimal.valueOf(15)));
+        clotheDto.setName(clotheDto.getName() + " updated!");
+
+        clothe.setId(0L);
+
+        when(clotheRepository.findById(clothe.getId())).thenThrow(ResourceNotFoundException.class);
+
+        assertThrows(ResourceNotFoundException.class, () -> clothesServiceimpl.updateClothe(clothe.getId(), clotheDto));
+
+        verify(clotheRepository, times(1)).findById(clothe.getId());
+        verify(userRepository, never()).findByUsernameOrEmail(user.getUsername(), user.getUsername());
+        verify(clotheRepository, never()).save(clothe);
+        verify(modelMapper, never()).map(clothe, ClotheDto.class);
+    }
+
+    @Test
+    @WithMockUser(username = USERNAME)
+    void givenNullClotheDto_whenUpdateClothe_thenNullPointerExceptionIsThrown(){
+        when(clotheRepository.findById(clothe.getId())).thenReturn(Optional.of(clothe));
         when(userRepository.findByUsernameOrEmail(user.getUsername(), user.getUsername()))
                 .thenReturn(Optional.of(user));
+
+
+        assertThrows(NullPointerException.class, () -> clothesServiceimpl.updateClothe(clothe.getId(), null));
+
+        verify(clotheRepository, times(1)).findById(clothe.getId());
+        verify(userRepository, times(1)).findByUsernameOrEmail(user.getUsername(), user.getUsername());
+        verify(clotheRepository, never()).save(clothe);
+        verify(modelMapper, never()).map(clothe, ClotheDto.class);
     }
+
+    @Test
+    @WithMockUser(username = USERNAME)
+    void givenUserIsNotheOwner_whenUpdateClothe_thenApiExceptionIsThrown(){
+        clotheDto.setPrice(clotheDto.getPrice().add(BigDecimal.valueOf(15)));
+        clotheDto.setName(clotheDto.getName() + " updated!");
+        User otherUser = User.builder().id(2L).email("otherUser@email.com").username("other username")
+                                            .name("otherUser").password("1234qwer")
+                                            .roles(Set.of(new Role(1, "ROLE_USER")))
+                                            .build();
+        clothe.setUser(otherUser);
+
+        when(clotheRepository.findById(clothe.getId())).thenReturn(Optional.of(clothe));
+        when(userRepository.findByUsernameOrEmail(user.getUsername(), user.getUsername()))
+                .thenReturn(Optional.of(user));
+
+        assertThrows(ApiException.class, () -> clothesServiceimpl.updateClothe(clothe.getId(), clotheDto));
+
+        verify(clotheRepository, times(1)).findById(clothe.getId());
+        verify(userRepository, times(1)).findByUsernameOrEmail(user.getUsername(), user.getUsername());
+        verify(clotheRepository, never()).save(clothe);
+        verify(modelMapper, never()).map(clothe, ClotheDto.class);
+    }
+
 
 
 }
