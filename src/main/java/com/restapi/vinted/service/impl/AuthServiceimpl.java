@@ -12,6 +12,7 @@ import com.restapi.vinted.security.JwtTokenProvider;
 import com.restapi.vinted.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,18 +41,20 @@ public class AuthServiceimpl implements AuthService {
     }
 
     @Override
-    public JwtAuthResponse login(LoginDto loginDto) {
+    public JwtAuthResponse login(LoginDto loginDto){
+        try {
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    loginDto.getUsernameOrEmail(), loginDto.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                loginDto.getUsernameOrEmail(), loginDto.getPassword()));
+            //returning generated token (when user is authenticated)
+            JwtAuthResponse authResponse = new JwtAuthResponse();
+            authResponse.setAccessToken(jwtTokenProvider.generateToken(authentication));
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        //returning generated token (when user is authenticated)
-        JwtAuthResponse authResponse = new JwtAuthResponse();
-        authResponse.setAccessToken(jwtTokenProvider.generateToken(authentication));
-
-        return authResponse;
+            return authResponse;
+        } catch (BadCredentialsException exception){
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "Wrong username/email or password");
+        }
     }
 
     @Override

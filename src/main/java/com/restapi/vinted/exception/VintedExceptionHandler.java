@@ -25,7 +25,7 @@ public class VintedExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(),
                 request.getDescription(false));
 
-        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorDetails, ex.getStatus());
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

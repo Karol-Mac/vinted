@@ -23,7 +23,7 @@ public class AuthController {
 
     @PostMapping(value = {"/login", "/signin"})
     public ResponseEntity<JwtAuthResponse> login(@RequestBody LoginDto loginDto){
-        return new ResponseEntity<>(authService.login(loginDto), HttpStatus.CREATED);
+        return ResponseEntity.ok(authService.login(loginDto));
     }
 
     @PostMapping(value = {"/register", "/signup"})
