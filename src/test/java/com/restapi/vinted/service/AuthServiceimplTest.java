@@ -1,4 +1,4 @@
-package com.restapi.vinted.service.impl;
+package com.restapi.vinted.service;
 
 import com.restapi.vinted.entity.Role;
 import com.restapi.vinted.entity.User;
@@ -9,6 +9,7 @@ import com.restapi.vinted.payload.RegisterDto;
 import com.restapi.vinted.repository.RoleRepository;
 import com.restapi.vinted.repository.UserRepository;
 import com.restapi.vinted.security.JwtTokenProvider;
+import com.restapi.vinted.service.impl.AuthServiceimpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
