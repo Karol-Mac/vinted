@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class MyClothesServiceimpl implements MyClothesService {
@@ -64,7 +63,7 @@ public class MyClothesServiceimpl implements MyClothesService {
 
         //filtering the "chosen one", by given ID
         Clothe clothe = clothes.stream().filter(clo -> clo.getId()==id).findAny()
-                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, NOT_OWNER)
+                .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, NOT_OWNER)
                 );
 
         return mapToDto(clothe);
@@ -133,7 +132,7 @@ public class MyClothesServiceimpl implements MyClothesService {
 
     private void isOwner(Clothe clothe){
         if(!clothe.getUser().equals(getUser()))
-            throw new ApiException(HttpStatus.UNAUTHORIZED, NOT_OWNER);
+            throw new ApiException(HttpStatus.FORBIDDEN, NOT_OWNER);
     }
 
 

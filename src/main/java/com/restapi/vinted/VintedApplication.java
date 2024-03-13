@@ -16,7 +16,3 @@ public class VintedApplication {
 	}
 
 }
-//todo: dodać commandLineRunnera - żeby automatycznie zostały utworzone 2 role dla użytkowników
-//todo: fajnie by było, jakby byli też automatycznie tworzeni użytkownicy: user i admin
-// admin tworzyłby kategorie (CATEGORIES.txt),
-// a użytkownik dodawałby wszystkie ubrania ze swojego konta.
