@@ -46,6 +46,7 @@ public class ClotheServiceimpl implements ClotheService {
         Pageable page = PageRequest.of(pageNo, pageSize, sort);
 
         //create Page<Clothe> with custom DB method
+        getCategory(categoryId);
         Page<Clothe> clothes = clotheRepository.findByCategoryId(categoryId, page);
 
         //Create ClotheResponse - give more info to client
@@ -63,8 +64,7 @@ public class ClotheServiceimpl implements ClotheService {
 
     @Override
     public ClotheDto getClotheByCategory(long categoryId, long clotheId) {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow( ()-> new ResourceNotFoundException("Category", "id", categoryId));
+        Category category = getCategory(categoryId);
 
         Clothe clothe = clotheRepository.findById(clotheId)
                 .orElseThrow( ()-> new ResourceNotFoundException("Clothe", "id", clotheId));
@@ -73,6 +73,11 @@ public class ClotheServiceimpl implements ClotheService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Clothe does not belong to this category");
 
         return mapToDto(clothe);
+    }
+
+    private Category getCategory(long categoryId){
+        return categoryRepository.findById(categoryId)
+                .orElseThrow( ()-> new ResourceNotFoundException("Category", "id", categoryId));
     }
 
     private ClotheDto mapToDto(Clothe clothe){
