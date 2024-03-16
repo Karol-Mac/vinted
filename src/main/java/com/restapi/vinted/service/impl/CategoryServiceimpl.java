@@ -1,12 +1,15 @@
 package com.restapi.vinted.service.impl;
 
 import com.restapi.vinted.entity.Category;
+import com.restapi.vinted.exception.ApiException;
 import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.payload.CategoryDto;
 import com.restapi.vinted.repository.CategoryRepository;
 import com.restapi.vinted.service.CategoryService;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -24,6 +27,9 @@ public class CategoryServiceimpl implements CategoryService {
 
     @Override
     public CategoryDto createCategory(CategoryDto categoryDto) {
+        if(categoryDto.getName() == null)
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Name cannot be null");
+
         Category category = mapToEntity(categoryDto);
 
         Category savedCategory = categoryRepository.save(category);

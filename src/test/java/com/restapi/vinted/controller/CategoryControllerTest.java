@@ -1,9 +1,11 @@
 package com.restapi.vinted.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restapi.vinted.entity.Category;
 import com.restapi.vinted.payload.CategoryDto;
 import com.restapi.vinted.service.CategoryService;
+import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,12 +18,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
 @WebMvcTest(controllers = CategoryController.class)
 ////if we add there - there is no necessary to add tokens to our request's
 @AutoConfigureMockMvc(addFilters = false)
@@ -56,46 +62,43 @@ class CategoryControllerTest {
     @Test
     void givenCategoryDto_whencreateCategory_thenCategoryIsCreated() throws Exception{
         when(categoryService.createCategory(categoryDto)).thenReturn(categoryDto);
-//        when(categoryService.createCategory(any(CategoryDto.class))).thenReturn(categoryDto);
-
-//        given(categoryService.createCategory(any()))
-//                .willAnswer(invocation -> invocation.getArgument(0));
 
         ResultActions response = mockMvc.perform(post("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(categoryDto)));
 
-        response.andExpect(MockMvcResultMatchers.status().isCreated())
-                .andDo(MockMvcResultHandlers.print());
+        response.andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name", is(categoryDto.getName())))
+                .andDo(print());
     }
 
-//    @Test
-//    void testCreateCategory_gpt() {
-//        CategoryDto categoryDto = new CategoryDto();
-//        given(categoryService.createCategory(categoryDto))
-//                .willAnswer((invocation -> invocation.getArgument(0)));
-//
-//        // When
-//        ResponseEntity<CategoryDto> response = categoryController.createCategory(categoryDto);
-//
-//        // Then
-//        assertEquals(response.getStatusCode(), HttpStatus.CREATED);
-//        assertEquals(response.getBody(), categoryDto);
-//    }
-//
-//    @Test
-//    void testCreateCategory_copilot() {
-//        CategoryDto categoryDto = new CategoryDto();
-//        when(categoryService.createCategory(any(CategoryDto.class))).thenReturn(categoryDto);
-//
-//        ResponseEntity<CategoryDto> result = categoryController.createCategory(categoryDto);
-//        assertNotNull(result);
-//        assertEquals(HttpStatus.CREATED, result.getStatusCode());
-//        verify(categoryService, times(1)).createCategory(any(CategoryDto.class));
-//    }
+    @Test
+    void givenInvalidCategoryDto_whencreateCategory_thenCategoryIsCreated() throws Exception{
+        when(categoryService.createCategory(categoryDto)).thenReturn(categoryDto);
+
+        ResultActions response = mockMvc.perform(post("/api/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(categoryDto)));
+
+        response.andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name", is(categoryDto.getName())))
+                .andDo(print());
+    }
+
 
     @Test
-    void getAllCategories(){
+    void whenGetAllCategories_thenReturnListOfCategories() throws Exception{
+        List<CategoryDto> categories = List.of(categoryDto,
+                                            new CategoryDto(2L, "second cat"));
+        when(categoryService.getAllCategories()).thenReturn(categories);
+
+        ResultActions response = mockMvc.perform(get("/api/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(categoryDto)));
+
+        response.andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(categories.size())))
+                .andDo(print());
     }
 
     @Test

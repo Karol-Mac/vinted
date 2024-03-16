@@ -1,6 +1,7 @@
 package com.restapi.vinted.service;
 
 import com.restapi.vinted.entity.Category;
+import com.restapi.vinted.exception.ApiException;
 import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.payload.CategoryDto;
 import com.restapi.vinted.repository.CategoryRepository;
@@ -24,6 +25,11 @@ import static org.mockito.Mockito.*;
 //                                  gicenInvalidClotheId_whenGetClotheById_thenClotheIsRetrived
 //                                  (w klasie MyClothesServiceimplTest)
 
+
+
+
+//fixme: trzeba posprawdzać co się stani, jesli w wartaiw kontrolerów prześlemy nulla
+//  bo chyba nie koniecznie ten null dotrze do serwisu...dojdzie obiekt, którego pola to nulle
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceimplTest {
 
@@ -65,17 +71,14 @@ class CategoryServiceimplTest {
     }
 
     @Test
-    void givenNullCategoryDto_whenCreateCategory_thenIllegalArgumentExceptionIsThrown(){
-        when(modelMapper.map(null, Category.class))
-                .thenThrow(IllegalArgumentException.class);
+    void givenNullName_whenCreateCategory_thenIllegalArgumentExceptionIsThrown(){
+        CategoryDto nullName = new CategoryDto(4L, null);
+        assertThrows(ApiException.class,
+                () ->categoryServiceimpl.createCategory(nullName));
 
-
-        assertThrows(IllegalArgumentException.class,
-                () ->categoryServiceimpl.createCategory(null));
-
-        verify(modelMapper, times(1)).map(null, Category.class);
+        verify(modelMapper, never()).map(nullName, Category.class);
         verify(categoryRepository, never()).save(any());
-        verify(modelMapper, never()).map(category, CategoryDto.class);
+        verify(modelMapper, never()).map(any(), any());
     }
 
     @Test
