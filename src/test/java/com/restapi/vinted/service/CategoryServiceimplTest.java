@@ -20,15 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-//fixme: uszczegółowić sprawdzanie wyjątków - tak jak w metodzie
-//                                  gicenInvalidClotheId_whenGetClotheById_thenClotheIsRetrived
-//                                  (w klasie MyClothesServiceimplTest)
-
-
-
-
-//fixme: trzeba posprawdzać co się stani, jesli w wartaiw kontrolerów prześlemy nulla
-//  bo chyba nie koniecznie ten null dotrze do serwisu...dojdzie obiekt, którego pola to nulle
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceimplTest {
 
@@ -114,10 +105,9 @@ class CategoryServiceimplTest {
 
     @Test
     void givenCategoryIdAndCategoryDto_whenUpdateCategory_thenCategoryIsUpdated(){
-        String oldName = "old name";
         String updatedName = "updated name";
         categoryDto.setName(updatedName);
-        category.setName(oldName);
+        category.setName("old name");
 
         when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
         when(categoryRepository.save(category)).thenReturn(category);
@@ -129,7 +119,7 @@ class CategoryServiceimplTest {
         assertEquals(updatedCategory.getName(), updatedName);
         verify(categoryRepository, times(1)).findById(category.getId());
         verify(categoryRepository, times(1)).save(category);
-        verify(modelMapper).map(category, CategoryDto.class);
+        verify(modelMapper, times(1)).map(category, CategoryDto.class);
     }
 
     @Test
@@ -151,8 +141,9 @@ class CategoryServiceimplTest {
     void givenCategoryId_whenDeleteCategory_thenCategoryIsDeleted(){
         when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
 
-        categoryServiceimpl.deleteCategory(category.getId());
+        var message = categoryServiceimpl.deleteCategory(category.getId());
 
+        assertEquals(message, "Category successfully deleted!");
         verify(categoryRepository, times(1)).findById(category.getId());
         verify(categoryRepository, times(1)).delete(category);
     }

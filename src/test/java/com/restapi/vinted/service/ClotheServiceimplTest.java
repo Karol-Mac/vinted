@@ -27,6 +27,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+
+//fixme: uszczegółowić sprawdzanie wyjątków - tak jak w metodzie
+//                                  gicenInvalidClotheId_whenGetClotheById_thenApiExceptionIsThrown
+//                                  (w klasie MyClothesServiceimplTest)
+
+//fixme: trzeba posprawdzać co się stani, jesli w warstwie kontrolerów prześlemy nulla
+//  bo chyba nie koniecznie ten null dotrze do serwisu...dojdzie obiekt, którego pola to nulle
 @ExtendWith(MockitoExtension.class)
 class ClotheServiceimplTest {
 
@@ -149,7 +156,7 @@ class ClotheServiceimplTest {
 
 
     @Test
-    public void givenClotheNotInCategory_whenGetClotheByCategory_thenApiExceptionIsThrown() {
+    public void givenClotheNotInCategory_whenGetClothexByCategory_thenApiExceptionIsThrown() {
         Category anotherCategory = Category.builder().name("Another Category").id(7L).build();
         clothe.setCategory(anotherCategory);
 
