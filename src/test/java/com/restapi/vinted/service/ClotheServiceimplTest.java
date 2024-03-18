@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,16 +28,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-
-//fixme: uszczegółowić sprawdzanie wyjątków - tak jak w metodzie
-//                                  gicenInvalidClotheId_whenGetClotheById_thenApiExceptionIsThrown
-//                                  (w klasie MyClothesServiceimplTest)
-
-//fixme: trzeba posprawdzać co się stani, jesli w warstwie kontrolerów prześlemy nulla
-//  bo chyba nie koniecznie ten null dotrze do serwisu...dojdzie obiekt, którego pola to nulle
 @ExtendWith(MockitoExtension.class)
 class ClotheServiceimplTest {
-
+    private static final String CATEGORY_NOT_FOUND = "Category not found with id = ";
+    private static final String CLOTHE_NOT_FOUND = "Clothe not found with id = ";
     @Mock
     private ClotheRepository clotheRepository;
     @Mock
@@ -78,6 +73,7 @@ class ClotheServiceimplTest {
     public void givenCategoryId_whenGetClothesRelatedToCategory_thenClotheResponseIsRetrieved() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("name").ascending());
         Page<Clothe> page = new PageImpl<>(List.of(clothe), pageable, 1);
+        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
         when(clotheRepository.findByCategoryId(clothe.getId(), pageable)).thenReturn(page);
         when(modelMapper.map(clothe, ClotheDto.class)).thenReturn(clotheDto);
 
@@ -92,30 +88,32 @@ class ClotheServiceimplTest {
         assertEquals(10, clotheResponse.getPageSize());
         assertTrue(clotheResponse.isLast());
         assertTrue(clotheResponse.getClothes().contains(clotheDto));
-
+        verify(categoryRepository, times(1)).findById(clothe.getId());
         verify(clotheRepository, times(1))
-                            .findByCategoryId(clothe.getId(), pageable);
-        verify(modelMapper, times(1))
-                            .map(clothe, ClotheDto.class);
+                                            .findByCategoryId(clothe.getId(), pageable);
+        verify(modelMapper, times(1)).map(clothe, ClotheDto.class);
     }
 
     @Test
     public void givenInvalidCategoryId_whenGetClothesRelatedToCategory_thenResourceNotFoundExceptionIsThrown(){
+        category.setId(0L);
         Pageable pageable = PageRequest.of(0, 10, Sort.by("name").ascending());
-        when(clotheRepository.findByCategoryId(0L, pageable)).thenThrow(ResourceNotFoundException.class);
+        when(categoryRepository.findById(category.getId())).thenThrow(
+                new ResourceNotFoundException("Category", "id", category.getId()));
 
 
-        assertThrows(ResourceNotFoundException.class,
+        var exception = assertThrows(ResourceNotFoundException.class,
                 () -> clotheServiceimpl.getClothesRelatedToCategory(
-                                0L, 0, 10, "name", "asc"));
+                        category.getId(), 0, 10, "name", "asc"));
 
-        verify(clotheRepository, times(1))
-                                    .findByCategoryId(0L, pageable);
+        assertEquals(exception.getMessage(), CATEGORY_NOT_FOUND + category.getId());
+        verify(categoryRepository, times(1)).findById(category.getId());
+        verify(clotheRepository, never()).findByCategoryId(category.getId(), pageable);
         verify(modelMapper, never()).map(any(), any());
     }
 
     @Test
-    public void givenClotheIdAndCategoryId_whenGetClotheByCategory_thenListOfClothesIsRetrieved() {
+    public void givenClotheIdAndCategoryId_whenGetClotheByCategory_thenClotheDtoIsRetrieved() {
         when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
         when(clotheRepository.findById(clothe.getId())).thenReturn(Optional.of(clothe));
         when(modelMapper.map(clothe, ClotheDto.class)).thenReturn(clotheDto);
@@ -131,41 +129,49 @@ class ClotheServiceimplTest {
 
     @Test
     public void givenInvalidCategoryId_whenGetClotheByCategory_thenResourceNotFoundExceptionIsThrown() {
-        when(categoryRepository.findById(0L)).thenThrow(ResourceNotFoundException.class);
+        category.setId(0L);
+        when(categoryRepository.findById(category.getId())).thenThrow(
+                new ResourceNotFoundException("Category", "id", category.getId()));
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> clotheServiceimpl.getClotheByCategory(0L, clothe.getId()));
 
-        verify(categoryRepository, times(1)).findById(0L);
+        var exception = assertThrows(ResourceNotFoundException.class,
+                () -> clotheServiceimpl.getClotheByCategory(category.getId(), clothe.getId()));
+
+        assertEquals(exception.getMessage(), CATEGORY_NOT_FOUND + category.getId());
+        verify(categoryRepository, times(1)).findById(category.getId());
         verify(clotheRepository, never()).findById(clothe.getId());
         verify(modelMapper, never()).map(clothe, ClotheDto.class);
     }
 
     @Test
     public void givenInvalidClotheId_whenGetClotheByCategory_thenResourceNotFoundExceptionIsThrown() {
+        clothe.setId(0L);
         when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
-        when(clotheRepository.findById(0L)).thenThrow(ResourceNotFoundException.class);
+        when(clotheRepository.findById(clothe.getId())).thenThrow(
+                new ResourceNotFoundException("Clothe", "id", clothe.getId()));
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> clotheServiceimpl.getClotheByCategory(category.getId(), 0L));
+        var exception = assertThrows(ResourceNotFoundException.class,
+                () -> clotheServiceimpl.getClotheByCategory(category.getId(), clothe.getId()));
 
+        assertEquals(exception.getMessage(), CLOTHE_NOT_FOUND + clothe.getId());
         verify(categoryRepository, times(1)).findById(category.getId());
-        verify(clotheRepository, times(1)).findById(0L);
+        verify(clotheRepository, times(1)).findById(clothe.getId());
         verify(modelMapper, never()).map(clothe, ClotheDto.class);
     }
 
-
     @Test
-    public void givenClotheNotInCategory_whenGetClothexByCategory_thenApiExceptionIsThrown() {
+    public void givenClotheNotInCategory_whenGetClotheByCategory_thenApiExceptionIsThrown() {
         Category anotherCategory = Category.builder().name("Another Category").id(7L).build();
         clothe.setCategory(anotherCategory);
 
         when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
         when(clotheRepository.findById(clothe.getId())).thenReturn(Optional.of(clothe));
 
-        assertThrows(ApiException.class,
+        var exception = assertThrows(ApiException.class,
                 () -> clotheServiceimpl.getClotheByCategory(category.getId(), clothe.getId()));
 
+        assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
+        assertEquals(exception.getMessage(),"Clothe does not belong to this category");
         verify(categoryRepository, times(1)).findById(category.getId());
         verify(clotheRepository, times(1)).findById(clothe.getId());
         verify(modelMapper, never()).map(clothe, ClotheDto.class);

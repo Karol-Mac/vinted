@@ -53,6 +53,8 @@ public class MyClothesServiceimpl implements MyClothesService {
         return mapToDto(savedClothe);
     }
 
+    //fixme: poprawić tą metodę - i potem testy do niej.
+    // powinna sprawdzać, czy ubranie o danym id wgl istnieje!
     @Override
     public ClotheDto getClotheById(long id) {
         //getting logged-in user

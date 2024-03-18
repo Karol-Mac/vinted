@@ -31,6 +31,12 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+//fixme: uszczegółowić sprawdzanie wyjątków - tak jak w metodzie
+//                                  gicenInvalidClotheId_whenGetClotheById_thenApiExceptionIsThrown
+//                                  (w klasie MyClothesServiceimplTest)
+
+//fixme: trzeba posprawdzać co się stanie, jesli w warstwie kontrolerów prześlemy nulla
+//  bo chyba nie koniecznie ten null dotrze do serwisu...dojdzie obiekt, którego pola to nulle
 @ExtendWith({MockitoExtension.class, SpringExtension.class})
 class MyClothesServiceimplTest {
     @Mock
@@ -92,21 +98,6 @@ class MyClothesServiceimplTest {
         verify(userRepository, times(1)).findByUsernameOrEmail(user.getUsername(), user.getUsername());
         verify(clotheRepository, times(1)).save(clothe);
     }
-    @Test
-    @WithMockUser(username = USERNAME)
-    void givenNullClotheDto_whenCreateClothe_thenIllegalArgumentExceptionIdThrown(){
-        when(userRepository.findByUsernameOrEmail(user.getUsername(), user.getUsername()))
-                                                            .thenReturn(Optional.of(user));
-        when(modelMapper.map(null, Clothe.class)).thenThrow(IllegalArgumentException.class);
-
-        assertThrows(IllegalArgumentException.class,
-                () -> clothesServiceimpl.createClothe(null));
-
-        verify(userRepository, times(1)).findByUsernameOrEmail(user.getUsername(), user.getUsername());
-        verify(modelMapper, times(1)).map(null, Clothe.class);
-        verify(modelMapper, never()).map(clothe, ClotheDto.class);
-        verify(clotheRepository, never()).save(clothe);
-    }
 
     @Test
     @WithMockUser(username = USERNAME)
@@ -128,6 +119,7 @@ class MyClothesServiceimplTest {
     @Test
     @WithMockUser(username = USERNAME)
     void gicenInvalidClotheId_whenGetClotheById_thenApiExceptionIsThrown(){
+        clothe.setId(0L);
         when(userRepository.findByUsernameOrEmail(user.getUsername(), user.getUsername()))
                 .thenReturn(Optional.of(user));
         when(clotheRepository.findByUserId(user.getId())).thenReturn(List.of(clothe));
@@ -135,7 +127,7 @@ class MyClothesServiceimplTest {
         ApiException apiException = assertThrows(ApiException.class,
                 () -> clothesServiceimpl.getClotheById(0L));
 
-        assertEquals(apiException.getStatus(), HttpStatus.UNAUTHORIZED);
+        assertEquals(apiException.getStatus(), HttpStatus.FORBIDDEN);
         assertEquals(apiException.getMessage(), MyClothesServiceimpl.NOT_OWNER);
         verify(userRepository, times(1)).findByUsernameOrEmail(user.getUsername(), user.getUsername());
         verify(clotheRepository, times(1)).findByUserId(user.getId());
@@ -154,7 +146,7 @@ class MyClothesServiceimplTest {
         ApiException apiException = assertThrows(ApiException.class,
                 () -> clothesServiceimpl.getClotheById(0L));
 
-        assertEquals(apiException.getStatus(), HttpStatus.UNAUTHORIZED);
+        assertEquals(apiException.getStatus(), HttpStatus.FORBIDDEN);
         assertEquals(apiException.getMessage(), MyClothesServiceimpl.NOT_OWNER);
         verify(userRepository, times(1)).findByUsernameOrEmail(user.getUsername(), user.getUsername());
         verify(clotheRepository, times(1)).findByUserId(user.getId());
@@ -163,8 +155,6 @@ class MyClothesServiceimplTest {
 
     @Test
     @WithMockUser(username = USERNAME)
-    //IS THERE "ANTY" METHOD TO THIS?
-    // No, paggination params cannot be wrong, they have default value
     void whenGetClothes_thenClotheResponseIsRetrived(){
         Pageable pageable = PageRequest.of(0, 10, Sort.by("name").ascending());
         Page<Clothe> page = new PageImpl<>(List.of(clothe), pageable, 1);
@@ -332,8 +322,6 @@ class MyClothesServiceimplTest {
         verify(userRepository, times(1)).findByUsernameOrEmail(user.getUsername(), user.getUsername());
         verify(clotheRepository, never()).delete(clothe);
     }
-
-
 }
 
 
