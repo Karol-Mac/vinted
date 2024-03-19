@@ -77,7 +77,7 @@ public class MyClothesServiceimpl implements MyClothesService {
         //getting logged-in user
         User user = getUser();
 
-        //define direction of sorting, and by what to sort by
+        //define the direction of sorting, and by what to sort by
         Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name()) ?
                 Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
 
@@ -86,7 +86,7 @@ public class MyClothesServiceimpl implements MyClothesService {
         //getting page of clothes owned by logged-in user
         Page<Clothe> clothes = clotheRepository.findByUserId(user.getId(), page);
 
-        //creating ClotheResponse - bring more information about clothes to client
+        //creating ClotheResponse - bring more information about clothes to a client
         ClotheResponse clotheResponse = new ClotheResponse();
 
         clotheResponse.setClothes(clothes.stream().map(this::mapToDto).toList());
