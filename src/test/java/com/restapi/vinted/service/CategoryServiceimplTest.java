@@ -5,16 +5,19 @@ import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.payload.CategoryDto;
 import com.restapi.vinted.repository.CategoryRepository;
 import com.restapi.vinted.service.impl.CategoryServiceimpl;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.verification.VerificationMode;
 import org.modelmapper.ModelMapper;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -24,18 +27,13 @@ import static org.mockito.Mockito.*;
 class CategoryServiceimplTest {
 
     private static final String CATEGORY_NOT_FOUND = "Category not found with id = ";
-
     @Mock
     private CategoryRepository categoryRepository;
-
     @Mock
     private ModelMapper modelMapper;
-
     @InjectMocks
     private CategoryServiceimpl categoryServiceimpl;
-
     private Category category;
-
     private CategoryDto categoryDto;
     @BeforeEach
     public void init(){
@@ -64,7 +62,7 @@ class CategoryServiceimplTest {
 
     @Test
     void givenCategoryId_whenGetCategory_thenCategoryIsRertived(){
-        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+        whenCategoryRepositor_FindById();
         when(modelMapper.map(category, CategoryDto.class)).thenReturn(categoryDto);
 
         var foundedCat = categoryServiceimpl.getCategory(category.getId());
@@ -78,16 +76,18 @@ class CategoryServiceimplTest {
 
     @Test
     void givenInvalidCateggoryId_whenGetCategory_thenResourceNotFoundExceptionIsThrown(){
-        when(categoryRepository.findById(0L)).thenThrow(
-                                        new ResourceNotFoundException("Category", "id", 0L));
+        category.setId(0L);
+        whenCategoryRepositor_FindById(category.getId());
 
         var exception = assertThrows(ResourceNotFoundException.class,
-                () ->categoryServiceimpl.getCategory(0L));
+                () ->categoryServiceimpl.getCategory(category.getId()));
 
-        assertEquals(exception.getMessage(), CATEGORY_NOT_FOUND + 0L);
-        verify(categoryRepository, times(1)).findById(0L);
+        assertResourceNotFound(exception);
+        verify(categoryRepository, times(1)).findById(category.getId());
         verify(modelMapper, never()).map(category, CategoryDto.class);
     }
+
+
 
     @Test
     void whenGetAllCategories_thenListOfCategoriesIsRetrieved(){
@@ -109,7 +109,7 @@ class CategoryServiceimplTest {
         categoryDto.setName(updatedName);
         category.setName("old name");
 
-        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+        whenCategoryRepositor_FindById();
         when(categoryRepository.save(category)).thenReturn(category);
         when(modelMapper.map(category, CategoryDto.class)).thenReturn(categoryDto);
 
@@ -117,47 +117,58 @@ class CategoryServiceimplTest {
 
         assertNotNull(updatedCategory);
         assertEquals(updatedCategory.getName(), updatedName);
-        verify(categoryRepository, times(1)).findById(category.getId());
-        verify(categoryRepository, times(1)).save(category);
+        verifyMockOperation(times(1), repo -> verify(repo, times(1)).save(category));
         verify(modelMapper, times(1)).map(category, CategoryDto.class);
     }
 
     @Test
     void givenInvalidCategoryId_whenUpdateCategory_thenResourceNotFoundExceptionIsThrown(){
-        when(categoryRepository.findById(0L)).thenThrow(
-                                                new ResourceNotFoundException("Category", "id", 0L));
+        category.setId(0L);
+        whenCategoryRepositor_FindById(category.getId());
 
 
         var exception = assertThrows(ResourceNotFoundException.class,
-                () -> categoryServiceimpl.updateCategory(0L, categoryDto));
+                () -> categoryServiceimpl.updateCategory(category.getId(), categoryDto));
 
-        assertEquals(exception.getMessage(), CATEGORY_NOT_FOUND + 0L);
-        verify(categoryRepository, times(1)).findById(0L);
-        verify(categoryRepository, never()).save(any());
+        assertResourceNotFound(exception);
+        verifyMockOperation(times(1), repo -> verify(repo, never()).save(category));
         verify(modelMapper, never()).map(any(), any());
     }
 
     @Test
     void givenCategoryId_whenDeleteCategory_thenCategoryIsDeleted(){
-        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+        whenCategoryRepositor_FindById();
 
         var message = categoryServiceimpl.deleteCategory(category.getId());
 
         assertEquals(message, "Category successfully deleted!");
-        verify(categoryRepository, times(1)).findById(category.getId());
-        verify(categoryRepository, times(1)).delete(category);
+        verifyMockOperation(times(1),
+                            repo -> verify(repo, times(1)).delete(category));
     }
 
     @Test
     void givenInalidCategoryId_whenDeleteCategory_thenResourceNotFoundExceptionIsThrown(){
-        when(categoryRepository.findById(0L)).thenThrow(
-                                            new ResourceNotFoundException("Category", "id", 0L));
+        category.setId(0L);
+        whenCategoryRepositor_FindById(category.getId());
 
         var exception = assertThrows(ResourceNotFoundException.class,
-                () -> categoryServiceimpl.deleteCategory(0L));
+                () -> categoryServiceimpl.deleteCategory(category.getId()));
 
-        assertEquals(exception.getMessage(), CATEGORY_NOT_FOUND + 0L);
-        verify(categoryRepository, times(1)).findById(0L);
-        verify(categoryRepository, never()).delete(any());
+        assertResourceNotFound(exception);
+        verifyMockOperation(times(1), repo -> verify(repo, never()).delete(category));
+    }
+
+    private void assertResourceNotFound(ResourceNotFoundException exception){
+        assertEquals(exception.getMessage(), CATEGORY_NOT_FOUND + category.getId());
+    }
+    private void verifyMockOperation( VerificationMode verifyCategory, @NotNull Consumer<CategoryRepository> action){
+        verify(categoryRepository, verifyCategory).findById(category.getId());
+        action.accept(categoryRepository);
+    }
+    private void whenCategoryRepositor_FindById(){
+        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+    }
+    private void whenCategoryRepositor_FindById(long id){
+        when(categoryRepository.findById(id)).thenThrow(new ResourceNotFoundException("Category", "id", id));
     }
 }
