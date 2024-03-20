@@ -10,12 +10,14 @@ import com.restapi.vinted.repository.RoleRepository;
 import com.restapi.vinted.repository.UserRepository;
 import com.restapi.vinted.security.JwtTokenProvider;
 import com.restapi.vinted.service.impl.AuthServiceimpl;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.verification.VerificationMode;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -31,7 +33,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceimplTest {
-
     @Mock
     private AuthenticationManager authenticationManager;
     @Mock
@@ -52,22 +53,19 @@ class AuthServiceimplTest {
         String token = "testAccesToken";
 
         when(authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                        loginDto.getUsernameOrEmail(), loginDto.getPassword())))
-                .thenReturn(authentication);
+                    loginDto.getUsernameOrEmail(), loginDto.getPassword()))).thenReturn(authentication);
         when(jwtTokenProvider.generateToken(authentication)).thenReturn(token);
 
         JwtAuthResponse response = authServiceImpl.login(loginDto);
 
         assertEquals(token, response.getAccessToken());
-        verify(authenticationManager, times(1))
-                .authenticate(new UsernamePasswordAuthenticationToken(
-                                    loginDto.getUsernameOrEmail(), loginDto.getPassword()));
-        verify(jwtTokenProvider, times(1))
-                .generateToken(authentication);
+        verify(authenticationManager, times(1)).authenticate(
+                new UsernamePasswordAuthenticationToken(loginDto.getUsernameOrEmail(), loginDto.getPassword()));
+        verify(jwtTokenProvider, times(1)).generateToken(authentication);
     }
 
     @Test
-    void givenInvalidCredentials_whenLogin_thenUserIsLoggedIn() {
+    void givenInvalidCredentials_whenLogin_thenApiExceptionIsThrown() {
         LoginDto loginDto = new LoginDto("username", "wrong password");
 
         when(authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
@@ -76,75 +74,80 @@ class AuthServiceimplTest {
         // Test & Verify
         ApiException exception = assertThrows(ApiException.class, () -> authServiceImpl.login(loginDto));
 
-        assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
-        assertEquals(exception.getMessage(), "Wrong username/email or password");
+        assertApiException(exception, "Wrong username/email or password", HttpStatus.UNAUTHORIZED);
         verify(authenticationManager, times(1)).authenticate(
-                        new UsernamePasswordAuthenticationToken(loginDto.getUsernameOrEmail(), loginDto.getPassword()));
+                new UsernamePasswordAuthenticationToken(loginDto.getUsernameOrEmail(), loginDto.getPassword()));
         verify(jwtTokenProvider, never()).generateToken(any());
     }
 
 
     @Test
-    void givenRegisterDto_whenRegister_then() {
-        RegisterDto registerDto = new RegisterDto("name", "username",
-                                                  "test@email.com", "password");
+    void givenRegisterDto_whenRegister_thenRegister() {
+        RegisterDto registerDto = getRegisterDto();
         Role userRole = new Role(1L,"ROLE_USER");
         User user = User.builder().id(2L).email(registerDto.getEmail())
                         .name(registerDto.getName()).password(registerDto.getPassword())
                         .username(registerDto.getUsername())
                         .roles(Set.of(new Role(1, "ROLE_USER"))).build();
+
         when(userRepository.existsByUsername(registerDto.getUsername())).thenReturn(false);
         when(userRepository.existsByEmail(registerDto.getEmail())).thenReturn(false);
         when(roleRepository.findByName(userRole.getName())).thenReturn(Optional.of(userRole));
         when(passwordEncoder.encode(registerDto.getPassword())).thenReturn("encodedPassword");
-        when(userRepository.save(any(User.class)))
-                .thenReturn(user);
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
         String response = authServiceImpl.register(registerDto);
 
         assertEquals("User sign up successfully", response);
-        verify(userRepository, times(1))
-                                            .existsByUsername(registerDto.getUsername());
-        verify(userRepository, times(1))
-                                            .existsByEmail(registerDto.getEmail());
-        verify(roleRepository, times(1)).findByName(userRole.getName());
-        verify(passwordEncoder, times(1)).encode(registerDto.getPassword());
-        verify(userRepository, times(1)).save(any(User.class));
+        verifyMocksOperations(registerDto, times(1), times(1),
+                           times(1), times(1),
+                           times(1), userRole.getName());
     }
 
     @Test
     void givenUsernameExist_whenRegister_thenApiExceptionIsThrown() {
-        RegisterDto registerDto = new RegisterDto("name", "existingUsername",
-                                                  "test@email.com", "password");
+        RegisterDto registerDto = getRegisterDto();
         when(userRepository.existsByUsername(registerDto.getUsername())).thenReturn(true);
 
         var exception = assertThrows(ApiException.class, () -> authServiceImpl.register(registerDto));
-        assertEquals(exception.getMessage(), "Username is already taken");
-        assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
-        verify(userRepository, times(1)).existsByUsername(registerDto.getUsername());
 
-        verify(userRepository, never()).existsByEmail(anyString());
-        verify(roleRepository, never()).findByName(anyString());
-        verify(passwordEncoder, never()).encode(anyString());
-        verify(userRepository, never()).save(any(User.class));
+        assertApiException(exception, "Username is already taken", HttpStatus.BAD_REQUEST);
+        verifyMocksOperations(registerDto, times(1), never(),
+                never(), never(), never(), "");
     }
 
     @Test
     void givenEmailExist_whenRegister_thenApiExceptionIsThrown() {
-        RegisterDto registerDto = new RegisterDto("name", "username",
-                                                  "existingTest@email.com", "password");
+        RegisterDto registerDto = getRegisterDto();
         when(userRepository.existsByUsername(registerDto.getUsername())).thenReturn(false);
         when(userRepository.existsByEmail(registerDto.getEmail())).thenReturn(true);
 
         // Test & Verify
         var exception = assertThrows(ApiException.class, () -> authServiceImpl.register(registerDto));
-        assertEquals(exception.getMessage(), "Email already exist");
-        assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
-        verify(userRepository, times(1)).existsByUsername(registerDto.getUsername());
 
-        verify(userRepository, times(1)).existsByEmail(registerDto.getEmail());
-        verify(roleRepository, never()).findByName(anyString());
-        verify(passwordEncoder, never()).encode(anyString());
-        verify(userRepository, never()).save(any(User.class));
+        assertApiException(exception, "Email already exist", HttpStatus.BAD_REQUEST);
+
+
+        verifyMocksOperations(registerDto, times(1), times(1),
+                 never(), never(), never(), "");
+    }
+
+    private static void assertApiException(@NotNull ApiException exception, String message, HttpStatus status){
+        assertEquals(exception.getMessage(), message);
+        assertEquals(exception.getStatus(), status);
+    }
+    @NotNull
+    private static RegisterDto getRegisterDto(){
+        return new RegisterDto("name", "username",
+                "test@email.com", "password");
+    }
+    private void verifyMocksOperations(@NotNull RegisterDto registerDto, VerificationMode verifyExistByUsername,
+                                       VerificationMode verifyExistByEmail, VerificationMode findByName,
+                                       VerificationMode encode, VerificationMode save, String roleName){
+        verify(userRepository, verifyExistByUsername).existsByUsername(registerDto.getUsername());
+        verify(userRepository, verifyExistByEmail).existsByEmail(registerDto.getEmail());
+        verify(roleRepository, findByName).findByName(roleName);
+        verify(passwordEncoder, encode).encode(registerDto.getPassword());
+        verify(userRepository, save).save(any(User.class));
     }
 }
