@@ -123,8 +123,7 @@ class MyClothesServiceimplTest {
         ApiException apiException = assertThrows(ApiException.class,
                 () -> clothesServiceimpl.getClotheById(0L));
 
-        assertEquals(apiException.getStatus(), HttpStatus.FORBIDDEN);
-        assertEquals(apiException.getMessage(), MyClothesServiceimpl.NOT_OWNER);
+        assertApiException(apiException);
         verifygetClothe(times(1), times(1), never());
     }
 
@@ -143,12 +142,11 @@ class MyClothesServiceimplTest {
                 .thenReturn(Optional.of(user));
         when(clotheRepository.findByUserId(user.getId())).thenReturn(List.of(otherClothe));
 
-        //method will throw an exception, because with this ID isn't the user property
+        //method will throw an exception, because clothe with this ID isn't the user property
         var apiException = assertThrows(ApiException.class,
                 () -> clothesServiceimpl.getClotheById(clothe.getId()));
 
-        assertEquals(apiException.getStatus(), HttpStatus.FORBIDDEN);
-        assertEquals(apiException.getMessage(), MyClothesServiceimpl.NOT_OWNER);
+        assertApiException(apiException);
         verifygetClothe(times(1), times(1), never());
     }
 
@@ -168,7 +166,7 @@ class MyClothesServiceimplTest {
         assertNotNull(clothes);
         assertTrue(clothes.getClothes().contains(clotheDto));
         verifygetClothe(pageable, times(1),
-                                        times(1), times(1));
+                                  times(1), times(1));
     }
 
     @Test
@@ -184,7 +182,7 @@ class MyClothesServiceimplTest {
         assertNotNull(clothes);
         assertTrue(clothes.getClothes().isEmpty());
         verifygetClothe(pageable,
-                                times(1), times(1), never());
+            times(1), times(1), never());
     }
 
     @Test
@@ -243,10 +241,10 @@ class MyClothesServiceimplTest {
 
         var exception = assertThrows(ApiException.class,
                                 () -> clothesServiceimpl.updateClothe(clothe.getId(), clotheDto));
+
+        assertApiException(exception);
         assertNotEquals(clothe.getPrice(), clotheDto.getPrice());
         assertNotEquals(clothe.getName(), clotheDto.getName());
-        assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
-        assertEquals(exception.getMessage(), MyClothesServiceimpl.NOT_OWNER);
         verifyOperation(clothe.getId(), times(1), times(1),
                                                  repo -> verify(repo, never()).save(clothe));
         verify(modelMapper, never()).map(clothe, ClotheDto.class);
@@ -296,15 +294,17 @@ class MyClothesServiceimplTest {
         var exception = assertThrows(ApiException.class,
                                 () -> clothesServiceimpl.deleteClothe(clothe.getId()));
 
-        assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
-        assertEquals(exception.getMessage(), MyClothesServiceimpl.NOT_OWNER);
+        assertApiException(exception);
         verifyOperation(clothe.getId(), times(1), times(1),
                 repo -> verify(repo, never()).delete(clothe));
     }
 
 
 
-
+    private static void assertApiException(ApiException apiException){
+        assertEquals(apiException.getStatus(), HttpStatus.FORBIDDEN);
+        assertEquals(apiException.getMessage(), MyClothesServiceimpl.NOT_OWNER);
+    }
     private void verifygetClothe(Pageable pageable, VerificationMode verifyUser,
                                  VerificationMode verifyClothe, VerificationMode verifyMap){
         verify(userRepository, verifyUser).findByUsernameOrEmail(user.getUsername(), user.getUsername());
