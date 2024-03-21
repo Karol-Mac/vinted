@@ -21,7 +21,6 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.CoreMatchers.is;
 @WebMvcTest(controllers = CategoryController.class)
@@ -64,21 +63,22 @@ class CategoryControllerTest {
                 .content(objectMapper.writeValueAsString(categoryDto)));
 
         response.andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name", is(categoryDto.getName())))
-                .andDo(print());
+                .andExpect(jsonPath("$.name", is(categoryDto.getName())));
     }
 
+
+    //hope it's enough for testing validation :(
     @Test
     void givenInvalidCategoryDto_whencreateCategory_thenCategoryIsCreated() throws Exception{
-        when(categoryService.createCategory(categoryDto)).thenReturn(categoryDto);
+        categoryDto.setName("a");
 
         ResultActions response = mockMvc.perform(post("/api/categories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(categoryDto)));
 
-        response.andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name", is(categoryDto.getName())))
-                .andDo(print());
+        response.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.name",
+                            is("Name has to be at least 3 characters")));
     }
 
 
@@ -89,16 +89,24 @@ class CategoryControllerTest {
         when(categoryService.getAllCategories()).thenReturn(categories);
 
         ResultActions response = mockMvc.perform(get("/api/categories")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(categoryDto)));
+                .contentType(MediaType.APPLICATION_JSON));
 
         response.andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()", is(categories.size())))
-                .andDo(print());
+                .andExpect(jsonPath("$.size()", is(categories.size())));
     }
 
+
     @Test
-    void getCategoryById(){
+    void given_CategoryId_whenGetCategoryById_thenReturnListOfCategories() throws Exception{
+
+        when(categoryService.getCategory(category.getId())).thenReturn(categoryDto);
+
+        ResultActions response = mockMvc.perform(
+                get("/api/categories/{categoryId}", category.getId())
+                .contentType(MediaType.APPLICATION_JSON));
+
+        response.andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is(category.getName())));
     }
 
     @Test
