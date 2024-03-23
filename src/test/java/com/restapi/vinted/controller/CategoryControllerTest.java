@@ -2,6 +2,7 @@ package com.restapi.vinted.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restapi.vinted.entity.Category;
+import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.payload.CategoryDto;
 import com.restapi.vinted.service.CategoryService;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +20,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.CoreMatchers.is;
 @WebMvcTest(controllers = CategoryController.class)
@@ -29,7 +29,8 @@ import static org.hamcrest.CoreMatchers.is;
 @ExtendWith(MockitoExtension.class)
 //fixme: tokeny jwt są dodane oddzielnie - nie jako część spring security
 //  dlatego adnotacja @AutoConfigureMockMvc na nie nie działa
-// w klasie JwtAuthenticationFilter dodałem profilowanie (nie jest uruchamiana przy wykonywaniu testów)
+// w klasie JwtAuthenticationFilter dodałem profilowanie
+//  (nie jest uruchamiana przy wykonywaniu testów)
 // I dzięki temu teraz działa, ale docelowo fajnie by było to zmienić
 class CategoryControllerTest {
 
@@ -66,7 +67,6 @@ class CategoryControllerTest {
                 .andExpect(jsonPath("$.name", is(categoryDto.getName())));
     }
 
-
     //hope it's enough for testing validation :(
     @Test
     void givenInvalidCategoryDto_whencreateCategory_thenCategoryIsCreated() throws Exception{
@@ -77,13 +77,11 @@ class CategoryControllerTest {
                 .content(objectMapper.writeValueAsString(categoryDto)));
 
         response.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.name",
-                            is("Name has to be at least 3 characters")));
+                .andExpect(jsonPath("$.name", is("Name has to be at least 3 characters")));
     }
 
-
     @Test
-    void whenGetAllCategories_thenReturnListOfCategories() throws Exception{
+    void whenGetAllCategories_thenReturnListOfCategoriesDto() throws Exception{
         List<CategoryDto> categories = List.of(categoryDto,
                                             new CategoryDto(2L, "second cat"));
         when(categoryService.getAllCategories()).thenReturn(categories);
@@ -95,9 +93,8 @@ class CategoryControllerTest {
                 .andExpect(jsonPath("$.size()", is(categories.size())));
     }
 
-
     @Test
-    void given_CategoryId_whenGetCategoryById_thenReturnListOfCategories() throws Exception{
+    void givenCategoryId_whenGetCategoryById_thenReturnCategoryDto() throws Exception{
 
         when(categoryService.getCategory(category.getId())).thenReturn(categoryDto);
 
@@ -110,10 +107,46 @@ class CategoryControllerTest {
     }
 
     @Test
-    void deleteCategory(){
+    void givenInvalidCategoryId_whenGetCategoryById_thenReturnCategoryDto() throws Exception{
+        category.setId(0L);
+        ResourceNotFoundException exception = new ResourceNotFoundException(
+                                                        "Category", "id", category.getId());
+
+        when(categoryService.getCategory(category.getId()))
+                            .thenThrow(exception);
+
+        ResultActions response = mockMvc.perform(
+                get("/api/categories/{categoryId}", category.getId()));
+
+        response.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", is(exception.getMessage())));
     }
 
     @Test
-    void updateCategory(){
+    void givenCategoryId_whenUpdateCategory_thenCategoryIsUpdated() throws Exception{
+        when(categoryService.updateCategory(category.getId(), categoryDto))
+                                            .thenReturn(categoryDto);
+
+        ResultActions response = mockMvc.perform(
+                put("/api/categories/{categoryId}", category.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(categoryDto)));
+
+        response.andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is(category.getName())));
+    }
+
+    @Test
+    void givenCategoryId_whenDeleteCategory_thenCategoryIsDeleted() throws Exception{
+        String message = "Category successfully deleted!";
+        when(categoryService.deleteCategory(category.getId())).thenReturn(message);
+
+
+        ResultActions response = mockMvc.perform(
+                delete("/api/categories/{categoryId}", category.getId())
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        response.andExpect(status().isOk())
+                .andExpect(content().string(message));
     }
 }
