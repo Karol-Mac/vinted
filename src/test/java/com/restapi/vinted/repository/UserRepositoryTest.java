@@ -45,7 +45,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    void testSave_ValidUser(){
+    void givenUser_whenSave_thenUserIsSaved(){
 
         User saved = userRepository.save(user);
 
@@ -56,7 +56,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    void testFindByUsernameOrEmail_ExistingUsernameOrEmail() {
+    void givenUsernameOrEmail_whenFindByUsernameOrEmail_thenOptionalUserIsRetrived() {
         String email = "userNewEmail@email.com";
         user.setEmail(email);
         User saved = userRepository.save(user);
@@ -68,7 +68,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    void testFindByUsernameOrEmail_InvalidUsernameOrEmail() {
+    void givenInvalidUsernameOrEmail_whenFindByUsernameOrEmail_thenOptionalEmptyIsRetrived() {
         String email = "userNewEmail@email.com";
         String badEmail = "userBadEmail@email.com";
         user.setEmail(email);
@@ -80,7 +80,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    void testExistsByUsername_ValidUsername() {
+    void givenUsername_whenExistsByUsername_thenTrueIsReturned() {
         String username = "new username";
         user.setUsername(username);
         userRepository.save(user);
@@ -90,7 +90,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    void testExistsByUsername_InvalidUsername() {
+    void givenNotExistingUsername_whenExistsByUsername_thenFalseIsReturned() {
         String username = "new username";
         user.setUsername(username);
         userRepository.save(user);
@@ -100,21 +100,21 @@ class UserRepositoryTest {
     }
 
     @Test
-    void testExistsByEmail_ValidEmail() {
+    void givenEmail_whenExistsByEmail_thenTrueIsReturned() {
         String email = "userNewEmail@email.com";
-        user.setUsername(email);
+        user.setEmail(email);
         userRepository.save(user);
-        var founded = userRepository.existsByUsername(email);
+        var founded = userRepository.existsByEmail(email);
 
         assertTrue(founded);
     }
 
     @Test
-    void testExistsByEmail_InvalidEmail() {
+    void givenNotExistingEmail_whenExistsByEmail_thenFalseIsReturned() {
         String email = "userNewEmail@email.com";
-        user.setUsername(email);
+        user.setEmail(email);
         userRepository.save(user);
-        var founded = userRepository.existsByUsername("userBadEmail@email.com");
+        var founded = userRepository.existsByEmail("userBadEmail@email.com");
 
         assertFalse(founded);
     }

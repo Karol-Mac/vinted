@@ -23,19 +23,19 @@ public class CategoryRepositoryTest {
     private Category category;
 
     @BeforeEach
-    public void init(){
+    void init(){
         category = Category.builder()
                 .name("Test Category")
                 .build();
     }
     @AfterEach
-    public void cleanup() {
+    void cleanup() {
         clotheRepository.deleteAll();
         categoryRepository.deleteAll();
     }
 
     @Test
-    public void testSave_NewCategory() {
+    void givenCategory_whenSave_thenNewCategoryIsSaved() {
 
         Category savedCategory = categoryRepository.save(category);
 
@@ -45,7 +45,7 @@ public class CategoryRepositoryTest {
     }
 
     @Test
-    public void testFindAll(){
+    void whenFindAll_thenListOfCategoriesIsRetrived(){
         Category category2 = Category.builder().name("Category 2").build();
         categoryRepository.saveAll(List.of(category, category2));
 
@@ -56,7 +56,7 @@ public class CategoryRepositoryTest {
     }
 
     @Test
-    public void testFindById_ValidCategoryId() {
+    void givenCategoryId_whenFindById_thenCategoryIsRetrived() {
         Category savedCategory = categoryRepository.save(category);
 
         var foundCategory = categoryRepository.findById(savedCategory.getId());
@@ -66,7 +66,7 @@ public class CategoryRepositoryTest {
     }
 
     @Test
-    public void testDelete() {
+    void givenCategory_whenDelete_thenCategoryIsDeleted() {
         Category savedCategory = categoryRepository.save(category);
 
         categoryRepository.delete(savedCategory);

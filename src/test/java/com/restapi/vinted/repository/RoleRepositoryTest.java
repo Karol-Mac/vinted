@@ -15,7 +15,7 @@ public class RoleRepositoryTest {
     private RoleRepository roleRepository;
 
     @Test
-    public void testSave_ValidClothe(){
+    public void givenRole_whenSave_thenRoleIsSaved(){
         Role role = Role.builder().name("ROLE_USER").build();
 
         var savedRole = roleRepository.save(role);
@@ -27,7 +27,7 @@ public class RoleRepositoryTest {
 
 
     @Test
-    public void testFindByName_ExistingRoleName(){
+    public void givenRoleName_whenFindByName_thenOptionalOfRoleIsRetrived(){
         Role role = Role.builder().name("ROLE_USER").build();
         var savedRole = roleRepository.save(role);
 
@@ -38,9 +38,9 @@ public class RoleRepositoryTest {
     }
 
     @Test
-    public void testFindByName_InvalidRoleName(){
+    public void givenInvalidRoleName_whenFindByName_thenOptionalOfEmptyIsRetrived(){
         Role role = Role.builder().name("ROLE_USER").build();
-        var savedRole = roleRepository.save(role);
+        roleRepository.save(role);
 
         var foundedRole = roleRepository.findByName("ROLE_ADMIN");
 

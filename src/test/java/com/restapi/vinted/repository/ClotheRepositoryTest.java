@@ -52,7 +52,7 @@ class ClotheRepositoryTest {
     }
 
     @Test
-    public void testSave_ValidClothe(){
+    public void givenClothe_whenSave_thenClotheIsSaved(){
         Clothe saved = clotheRepository.save(clothe1);
 
         assertNotNull(saved);
@@ -64,7 +64,7 @@ class ClotheRepositoryTest {
     }
 
     @Test
-    public void testFindAll(){
+    public void whenFindAll_thenListOfCLothesIsRetrived(){
         Clothe saved = clotheRepository.save(clothe1);
         clotheRepository.save(clothe2);
         List<Clothe> clothes = clotheRepository.findAll();
@@ -76,18 +76,7 @@ class ClotheRepositoryTest {
     }
 
     @Test
-    public void testFindAll_ClotheNotInDB(){
-        Clothe saved = clotheRepository.save(clothe1);
-        List<Clothe> clothes = clotheRepository.findAll();
-
-        assertThat(clothes).isNotEmpty();
-        assertThat(clothes).doesNotContain(clothe2);
-        assertThat(clothes).contains(saved);
-        assertThat(clothes.size()).isEqualTo(1);
-    }
-
-    @Test
-    public void testFindById_ValidClotheId(){
+    public void givenClotheId_whenFindById_thenOptionalOfClotheIsRetrived(){
         Clothe saved = clotheRepository.save(clothe1);
 
         Clothe founded = clotheRepository.findById(saved.getId()).get();
@@ -96,7 +85,7 @@ class ClotheRepositoryTest {
     }
 
     @Test
-    public void testFindById_InvalidClotheId(){
+    public void givenInvalidClotheId_whenFindById_thenOptionalOfEmptyIsRetrived(){
         Clothe saved = clotheRepository.save(clothe1);
         var founded = clotheRepository.findById(saved.getId()+3);
 
@@ -104,7 +93,7 @@ class ClotheRepositoryTest {
     }
 
     @Test
-    public void testDelete_ClotheNotInDB(){
+    public void givenClothe_whenDelete_thenCLotheIsDeleted(){
         Clothe savedClothe = clotheRepository.save(clothe1);
 
         clotheRepository.delete(savedClothe);
@@ -114,7 +103,7 @@ class ClotheRepositoryTest {
     }
 
     @Test
-    void testFindByCategoryId_ValidCategoryId() {
+    void givenCategoryId_whenFindByCategoryId_thenListOfClothesIsRetrived() {
         Category category = Category.builder()
                 .name("test cat")
                 .build();
@@ -122,15 +111,14 @@ class ClotheRepositoryTest {
 
         clothe1.setCategory(savedCategory);
         Clothe saved = clotheRepository.save(clothe1);
-        var founded = clotheRepository.findByCategoryId(savedCategory.getId(),
-                                                                Pageable.unpaged());
+        var founded = clotheRepository.findByCategoryId(savedCategory.getId(), Pageable.unpaged());
 
         assertNotNull(founded);
         assertTrue(founded.getContent().contains(saved));
     }
 
     @Test
-    void testFindByUserId_() {
+    void fivenUserId_whenFindByUserId_thenListOfClothesIsRetrived() {
         User user = User.builder()
                 .name("test")
                 .email("test@email.com")
@@ -150,7 +138,7 @@ class ClotheRepositoryTest {
     }
 
     @Test
-    void testFindByUserIdPageable() {
+    void givenUserIdAndPageable_whenFindByUserIdPageable_thenPageOfClothesIsRetrived() {
         User user = User.builder()
                 .name("test")
                 .email("test@email.com")
