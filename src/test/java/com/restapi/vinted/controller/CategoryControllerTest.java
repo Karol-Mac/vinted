@@ -5,6 +5,7 @@ import com.restapi.vinted.entity.Category;
 import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.payload.CategoryDto;
 import com.restapi.vinted.service.CategoryService;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,7 +70,7 @@ class CategoryControllerTest {
 
     //hope it's enough for testing validation :(
     @Test
-    void givenInvalidCategoryDto_whencreateCategory_thenCategoryIsCreated() throws Exception{
+    void givenInvalidCategoryDto_whencreateCategory_thenValidationFailed() throws Exception{
         categoryDto.setName("a");
 
         ResultActions response = mockMvc.perform(post("/api/categories")
@@ -81,7 +82,7 @@ class CategoryControllerTest {
     }
 
     @Test
-    void whenGetAllCategories_thenReturnListOfCategoriesDto() throws Exception{
+    void whenGetAllCategories_thenReturnListOfCategoryDto() throws Exception{
         List<CategoryDto> categories = List.of(categoryDto,
                                             new CategoryDto(2L, "second cat"));
         when(categoryService.getAllCategories()).thenReturn(categories);
@@ -107,10 +108,9 @@ class CategoryControllerTest {
     }
 
     @Test
-    void givenInvalidCategoryId_whenGetCategoryById_thenReturnCategoryDto() throws Exception{
+    void givenInvalidCategoryId_whenGetCategoryById_thenThrowResourceNotFoundException() throws Exception{
         category.setId(0L);
-        ResourceNotFoundException exception = new ResourceNotFoundException(
-                                                        "Category", "id", category.getId());
+        ResourceNotFoundException exception = getException();
 
         when(categoryService.getCategory(category.getId()))
                             .thenThrow(exception);
@@ -137,6 +137,36 @@ class CategoryControllerTest {
     }
 
     @Test
+    void givenInvalidCategoryId_whenUpdateCategory_thenThrowResourceNotFoundException() throws Exception{
+        category.setId(0L);
+        var exception = getException();
+        when(categoryService.updateCategory(category.getId(), categoryDto)).thenThrow(exception);
+
+        ResultActions response = mockMvc.perform(
+                put("/api/categories/{categoryId}", category.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(categoryDto)));
+
+        response.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", is(exception.getMessage())));
+    }
+
+
+    //is method name good?
+    @Test
+    void givenInvalidCategoryDto_whenUpdateCategory_thenValidationFailed() throws Exception{
+        categoryDto.setName("a");
+
+        ResultActions response = mockMvc.perform(
+                put("/api/categories/{categoryId}", category.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(categoryDto)));
+
+        response.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.name", is("Name has to be at least 3 characters")));
+    }
+
+    @Test
     void givenCategoryId_whenDeleteCategory_thenCategoryIsDeleted() throws Exception{
         String message = "Category successfully deleted!";
         when(categoryService.deleteCategory(category.getId())).thenReturn(message);
@@ -148,5 +178,26 @@ class CategoryControllerTest {
 
         response.andExpect(status().isOk())
                 .andExpect(content().string(message));
+    }
+
+    @Test
+    void givenInvalidCategoryId_whenDeleteCategory_thenThrowResourceNotFoundException() throws Exception{
+        var exception = getException();
+        when(categoryService.deleteCategory(category.getId())).thenThrow(exception);
+
+
+        ResultActions response = mockMvc.perform(
+                delete("/api/categories/{categoryId}", category.getId())
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        response.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", is(exception.getMessage())));
+    }
+
+
+    @NotNull
+    private ResourceNotFoundException getException(){
+        return new ResourceNotFoundException(
+                "Category", "id", category.getId());
     }
 }
