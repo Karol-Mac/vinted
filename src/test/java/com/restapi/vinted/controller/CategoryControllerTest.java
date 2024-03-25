@@ -15,6 +15,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -27,7 +29,7 @@ import static org.hamcrest.CoreMatchers.is;
 @WebMvcTest(controllers = CategoryController.class)
 ////if we add there - there is no necessary to add tokens to our request's
 @AutoConfigureMockMvc(addFilters = false)
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, SpringExtension.class})
 //fixme: tokeny jwt są dodane oddzielnie - nie jako część spring security
 //  dlatego adnotacja @AutoConfigureMockMvc na nie nie działa
 // w klasie JwtAuthenticationFilter dodałem profilowanie
@@ -57,7 +59,8 @@ class CategoryControllerTest {
     }
 
     @Test
-    void givenCategoryDto_whencreateCategory_thenCategoryIsCreated() throws Exception{
+    @WithMockUser(roles = "ADMIN")
+    void givenAdminUserAndCategoryDto_whencreateCategory_thenCategoryIsCreated() throws Exception{
         when(categoryService.createCategory(categoryDto)).thenReturn(categoryDto);
 
         ResultActions response = mockMvc.perform(post("/api/categories")
@@ -165,6 +168,19 @@ class CategoryControllerTest {
         response.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.name", is("Name has to be at least 3 characters")));
     }
+
+
+    //FIXME: przechodzi, a nie powinno!
+    //  przez te tokeny JWT - trzeba to naprawić
+    @Test
+    @WithMockUser(roles = "USER")
+    public void accessDeniedTest() throws Exception {
+        mockMvc.perform(put("/api/categories/{categoryId}", categoryDto.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(categoryDto)))
+                .andExpect(status().isForbidden());
+    }
+
 
     @Test
     void givenCategoryId_whenDeleteCategory_thenCategoryIsDeleted() throws Exception{
