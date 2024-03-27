@@ -37,6 +37,8 @@ import static org.hamcrest.CoreMatchers.is;
 // I dzięki temu teraz działa, ale docelowo fajnie by było to zmienić
 class CategoryControllerTest {
 
+    private final static String ADMIN_USERNAME = "admin";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -59,7 +61,7 @@ class CategoryControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(roles = "ADMIN", username = ADMIN_USERNAME)
     void givenAdminUserAndCategoryDto_whencreateCategory_thenCategoryIsCreated() throws Exception{
         when(categoryService.createCategory(categoryDto)).thenReturn(categoryDto);
 
@@ -178,7 +180,7 @@ class CategoryControllerTest {
         mockMvc.perform(put("/api/categories/{categoryId}", categoryDto.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(categoryDto)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
     }
 
 

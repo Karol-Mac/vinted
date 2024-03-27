@@ -7,6 +7,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -16,6 +17,7 @@ import java.security.Key;
 import java.util.Date;
 
 @Component
+@NoArgsConstructor
 public class JwtTokenProvider{
 
     @Value("ad165b11320bc91501ab08613cc3a48a62a6caca4d5c8b14ca82cc313b3b96cd")
