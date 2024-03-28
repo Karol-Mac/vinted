@@ -5,6 +5,7 @@ import com.restapi.vinted.entity.Category;
 import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.payload.CategoryDto;
 import com.restapi.vinted.service.CategoryService;
+import com.restapi.vinted.utils.Constant;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ class CategoryControllerTest {
     private final static String ADMIN = "admin";
     private final static String USER = "user";
     private final static String ACCESS_DENIED = "Access Denied";
+    private final static String BASE_URL = "/api/categories";
 
     @Autowired
     private MockMvc mockMvc;
@@ -60,7 +62,7 @@ class CategoryControllerTest {
     void givenAdminUserAndCategoryDto_whencreateCategory_thenCategoryIsCreated() throws Exception{
         when(categoryService.createCategory(categoryDto)).thenReturn(categoryDto);
 
-        ResultActions response = mockMvc.perform(post("/api/categories")
+        ResultActions response = mockMvc.perform(post(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(categoryDto)));
 
@@ -72,7 +74,7 @@ class CategoryControllerTest {
     @WithMockUser(roles = "USER", username = USER)
     void givenUserAndCategoryDto_whencreateCategory_thenAccessDeniedExceptionIsThrown() throws Exception{
 
-        ResultActions response = mockMvc.perform(post("/api/categories")
+        ResultActions response = mockMvc.perform(post(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(categoryDto)));
 
@@ -88,12 +90,12 @@ class CategoryControllerTest {
     void givenAdminUserAndInvalidCategoryDto_whencreateCategory_thenValidationFailed() throws Exception{
         categoryDto.setName("a");
 
-        ResultActions response = mockMvc.perform(post("/api/categories")
+        ResultActions response = mockMvc.perform(post(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(categoryDto)));
 
         response.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.name", is("Name has to be at least 3 characters")));
+                .andExpect(jsonPath("$.name", is(Constant.NAME_VALIDATION_FAILED)));
 
         verify(categoryService, never()).createCategory(categoryDto);
     }
@@ -103,12 +105,12 @@ class CategoryControllerTest {
     void givenUserAndInvalidCategoryDto_whencreateCategory_thenValidationFailed() throws Exception{
         categoryDto.setName("a");
 
-        ResultActions response = mockMvc.perform(post("/api/categories")
+        ResultActions response = mockMvc.perform(post(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(categoryDto)));
 
         response.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.name",is("Name has to be at least 3 characters")));
+                .andExpect(jsonPath("$.name",is(Constant.NAME_VALIDATION_FAILED)));
 
         verify(categoryService, never()).createCategory(categoryDto);
     }
@@ -119,7 +121,7 @@ class CategoryControllerTest {
                                             new CategoryDto(2L, "second cat"));
         when(categoryService.getAllCategories()).thenReturn(categories);
 
-        ResultActions response = mockMvc.perform(get("/api/categories")
+        ResultActions response = mockMvc.perform(get(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON));
 
         response.andExpect(status().isOk())
@@ -132,7 +134,7 @@ class CategoryControllerTest {
         when(categoryService.getCategory(category.getId())).thenReturn(categoryDto);
 
         ResultActions response = mockMvc.perform(
-                get("/api/categories/{categoryId}", category.getId())
+                get(BASE_URL+"/{categoryId}", category.getId())
                 .contentType(MediaType.APPLICATION_JSON));
 
         response.andExpect(status().isOk())
@@ -148,7 +150,7 @@ class CategoryControllerTest {
                             .thenThrow(exception);
 
         ResultActions response = mockMvc.perform(
-                get("/api/categories/{categoryId}", category.getId()));
+                get(BASE_URL+"/{categoryId}", category.getId()));
 
         response.andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message", is(exception.getMessage())));
@@ -161,7 +163,7 @@ class CategoryControllerTest {
                                             .thenReturn(categoryDto);
 
         ResultActions response = mockMvc.perform(
-                put("/api/categories/{categoryId}", category.getId())
+                put(BASE_URL+"/{categoryId}", category.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(categoryDto)));
 
@@ -174,7 +176,7 @@ class CategoryControllerTest {
     void givenUserAndCategoryId_whenUpdateCategory_thenAccessDeniedExceptionIsThrown() throws Exception{
 
         ResultActions response = mockMvc.perform(
-                put("/api/categories/{categoryId}", category.getId())
+                put(BASE_URL+"/{categoryId}", category.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(categoryDto)));
 
@@ -192,7 +194,7 @@ class CategoryControllerTest {
         when(categoryService.updateCategory(category.getId(), categoryDto)).thenThrow(exception);
 
         ResultActions response = mockMvc.perform(
-                put("/api/categories/{categoryId}", category.getId())
+                put(BASE_URL+"/{categoryId}", category.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(categoryDto)));
 
@@ -207,12 +209,14 @@ class CategoryControllerTest {
         categoryDto.setName("a");
 
         ResultActions response = mockMvc.perform(
-                put("/api/categories/{categoryId}", category.getId())
+                put(BASE_URL+"/{categoryId}", category.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(categoryDto)));
 
         response.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.name", is("Name has to be at least 3 characters")));
+                .andExpect(jsonPath("$.name", is(Constant.NAME_VALIDATION_FAILED)));
+
+        verify(categoryService, never()).updateCategory(category.getId(), categoryDto);
     }
 
     @Test
@@ -223,7 +227,7 @@ class CategoryControllerTest {
 
 
         ResultActions response = mockMvc.perform(
-                delete("/api/categories/{categoryId}", category.getId())
+                delete(BASE_URL+"/{categoryId}", category.getId())
                         .contentType(MediaType.APPLICATION_JSON));
 
         response.andExpect(status().isOk())
@@ -235,7 +239,7 @@ class CategoryControllerTest {
     void givenUserCategoryId_whenDeleteCategory_thenAccessDeniedExceptionIsThrown() throws Exception{
 
         ResultActions response = mockMvc.perform(
-                delete("/api/categories/{categoryId}", category.getId())
+                delete(BASE_URL+"/{categoryId}", category.getId())
                         .contentType(MediaType.APPLICATION_JSON));
 
         response.andExpect(status().isForbidden())
@@ -252,7 +256,7 @@ class CategoryControllerTest {
 
 
         ResultActions response = mockMvc.perform(
-                delete("/api/categories/{categoryId}", category.getId())
+                delete(BASE_URL+"/{categoryId}", category.getId())
                         .contentType(MediaType.APPLICATION_JSON));
 
         response.andExpect(status().isNotFound())
