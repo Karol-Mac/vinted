@@ -30,7 +30,9 @@ import static org.hamcrest.CoreMatchers.is;
 @ExtendWith(MockitoExtension.class)
 class CategoryControllerTest {
 
-    private final static String ADMIN_USERNAME = "admin";
+    private final static String ADMIN = "admin";
+    private final static String USER = "user";
+    private final static String ACCESS_DENIED = "Access Denied";
 
     @Autowired
     private MockMvc mockMvc;
@@ -54,7 +56,7 @@ class CategoryControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN", username = ADMIN_USERNAME)
+    @WithMockUser(roles = "ADMIN", username = ADMIN)
     void givenAdminUserAndCategoryDto_whencreateCategory_thenCategoryIsCreated() throws Exception{
         when(categoryService.createCategory(categoryDto)).thenReturn(categoryDto);
 
@@ -66,10 +68,24 @@ class CategoryControllerTest {
                 .andExpect(jsonPath("$.name", is(categoryDto.getName())));
     }
 
-    //hope it's enough for testing validation :(
     @Test
-    @WithMockUser(roles = "ADMIN", username = ADMIN_USERNAME)
-    void givenInvalidCategoryDto_whencreateCategory_thenValidationFailed() throws Exception{
+    @WithMockUser(roles = "USER", username = USER)
+    void givenUserAndCategoryDto_whencreateCategory_thenAccessDeniedExceptionIsThrown() throws Exception{
+
+        ResultActions response = mockMvc.perform(post("/api/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(categoryDto)));
+
+        response.andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message", is(ACCESS_DENIED)));
+
+        verify(categoryService, never()).createCategory(categoryDto);
+    }
+
+
+    @Test
+    @WithMockUser(roles = "ADMIN", username = ADMIN)
+    void givenAdminUserAndInvalidCategoryDto_whencreateCategory_thenValidationFailed() throws Exception{
         categoryDto.setName("a");
 
         ResultActions response = mockMvc.perform(post("/api/categories")
@@ -78,6 +94,23 @@ class CategoryControllerTest {
 
         response.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.name", is("Name has to be at least 3 characters")));
+
+        verify(categoryService, never()).createCategory(categoryDto);
+    }
+
+    @Test
+    @WithMockUser(roles = "USER", username = USER)
+    void givenUserAndInvalidCategoryDto_whencreateCategory_thenValidationFailed() throws Exception{
+        categoryDto.setName("a");
+
+        ResultActions response = mockMvc.perform(post("/api/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(categoryDto)));
+
+        response.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.name",is("Name has to be at least 3 characters")));
+
+        verify(categoryService, never()).createCategory(categoryDto);
     }
 
     @Test
@@ -122,8 +155,8 @@ class CategoryControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN", username = ADMIN_USERNAME)
-    void givenCategoryId_whenUpdateCategory_thenCategoryIsUpdated() throws Exception{
+    @WithMockUser(roles = "ADMIN", username = ADMIN)
+    void givenAdminUserAndCategoryId_whenUpdateCategory_thenCategoryIsUpdated() throws Exception{
         when(categoryService.updateCategory(category.getId(), categoryDto))
                                             .thenReturn(categoryDto);
 
@@ -137,8 +170,23 @@ class CategoryControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN", username = ADMIN_USERNAME)
-    void givenInvalidCategoryId_whenUpdateCategory_thenThrowResourceNotFoundException() throws Exception{
+    @WithMockUser(roles = "USER", username = USER)
+    void givenUserAndCategoryId_whenUpdateCategory_thenAccessDeniedExceptionIsThrown() throws Exception{
+
+        ResultActions response = mockMvc.perform(
+                put("/api/categories/{categoryId}", category.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(categoryDto)));
+
+        response.andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message", is(ACCESS_DENIED)));
+
+        verify(categoryService, never()).updateCategory(category.getId(), categoryDto);
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN", username = ADMIN)
+    void givenAdminUserAndInvalidCategoryId_whenUpdateCategory_thenThrowResourceNotFoundException() throws Exception{
         category.setId(0L);
         var exception = getException();
         when(categoryService.updateCategory(category.getId(), categoryDto)).thenThrow(exception);
@@ -154,8 +202,8 @@ class CategoryControllerTest {
 
 
     @Test
-    @WithMockUser(roles = "ADMIN", username = ADMIN_USERNAME)
-    void givenInvalidCategoryDto_whenUpdateCategory_thenValidationFailed() throws Exception{
+    @WithMockUser(roles = "ADMIN", username = ADMIN)
+    void givenAdminUserAndInvalidCategoryDto_whenUpdateCategory_thenValidationFailed() throws Exception{
         categoryDto.setName("a");
 
         ResultActions response = mockMvc.perform(
@@ -167,22 +215,9 @@ class CategoryControllerTest {
                 .andExpect(jsonPath("$.name", is("Name has to be at least 3 characters")));
     }
 
-
-    //FIXME: przechodzi, a nie powinno!
-    //  przez te tokeny JWT - trzeba to naprawić
-//    @Test
-//    @WithMockUser(roles = "USER")
-//    public void accessDeniedTest() throws Exception {
-//        mockMvc.perform(put("/api/categories/{categoryId}", categoryDto.getId())
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsString(categoryDto)))
-//                .andExpect(status().isOk());
-//    }
-
-
     @Test
-    @WithMockUser(roles = "ADMIN", username = ADMIN_USERNAME)
-    void givenCategoryId_whenDeleteCategory_thenCategoryIsDeleted() throws Exception{
+    @WithMockUser(roles = "ADMIN", username = ADMIN)
+    void givenAdminUserAndCategoryId_whenDeleteCategory_thenCategoryIsDeleted() throws Exception{
         String message = "Category successfully deleted!";
         when(categoryService.deleteCategory(category.getId())).thenReturn(message);
 
@@ -196,7 +231,21 @@ class CategoryControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN", username = ADMIN_USERNAME)
+    @WithMockUser(roles = "USER", username = USER)
+    void givenUserCategoryId_whenDeleteCategory_thenAccessDeniedExceptionIsThrown() throws Exception{
+
+        ResultActions response = mockMvc.perform(
+                delete("/api/categories/{categoryId}", category.getId())
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        response.andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message", is(ACCESS_DENIED)));
+
+        verify(categoryService, never()).deleteCategory(category.getId());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN", username = ADMIN)
     void givenInvalidCategoryId_whenDeleteCategory_thenThrowResourceNotFoundException() throws Exception{
         var exception = getException();
         when(categoryService.deleteCategory(category.getId())).thenThrow(exception);
@@ -209,7 +258,6 @@ class CategoryControllerTest {
         response.andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message", is(exception.getMessage())));
     }
-
 
     @NotNull
     private ResourceNotFoundException getException(){
