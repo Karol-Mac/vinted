@@ -12,11 +12,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -26,15 +25,9 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.CoreMatchers.is;
-@WebMvcTest(controllers = CategoryController.class)
-////if we add there - there is no necessary to add tokens to our request's
-@AutoConfigureMockMvc(addFilters = false)
-@ExtendWith({MockitoExtension.class, SpringExtension.class})
-//fixme: tokeny jwt są dodane oddzielnie - nie jako część spring security
-//  dlatego adnotacja @AutoConfigureMockMvc na nie nie działa
-// w klasie JwtAuthenticationFilter dodałem profilowanie
-//  (nie jest uruchamiana przy wykonywaniu testów)
-// I dzięki temu teraz działa, ale docelowo fajnie by było to zmienić
+@SpringBootTest
+@AutoConfigureMockMvc
+@ExtendWith(MockitoExtension.class)
 class CategoryControllerTest {
 
     private final static String ADMIN_USERNAME = "admin";
@@ -75,6 +68,7 @@ class CategoryControllerTest {
 
     //hope it's enough for testing validation :(
     @Test
+    @WithMockUser(roles = "ADMIN", username = ADMIN_USERNAME)
     void givenInvalidCategoryDto_whencreateCategory_thenValidationFailed() throws Exception{
         categoryDto.setName("a");
 
@@ -128,6 +122,7 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN", username = ADMIN_USERNAME)
     void givenCategoryId_whenUpdateCategory_thenCategoryIsUpdated() throws Exception{
         when(categoryService.updateCategory(category.getId(), categoryDto))
                                             .thenReturn(categoryDto);
@@ -142,6 +137,7 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN", username = ADMIN_USERNAME)
     void givenInvalidCategoryId_whenUpdateCategory_thenThrowResourceNotFoundException() throws Exception{
         category.setId(0L);
         var exception = getException();
@@ -157,8 +153,8 @@ class CategoryControllerTest {
     }
 
 
-    //is method name good?
     @Test
+    @WithMockUser(roles = "ADMIN", username = ADMIN_USERNAME)
     void givenInvalidCategoryDto_whenUpdateCategory_thenValidationFailed() throws Exception{
         categoryDto.setName("a");
 
@@ -174,17 +170,18 @@ class CategoryControllerTest {
 
     //FIXME: przechodzi, a nie powinno!
     //  przez te tokeny JWT - trzeba to naprawić
-    @Test
-    @WithMockUser(roles = "USER")
-    public void accessDeniedTest() throws Exception {
-        mockMvc.perform(put("/api/categories/{categoryId}", categoryDto.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(categoryDto)))
-                .andExpect(status().isOk());
-    }
+//    @Test
+//    @WithMockUser(roles = "USER")
+//    public void accessDeniedTest() throws Exception {
+//        mockMvc.perform(put("/api/categories/{categoryId}", categoryDto.getId())
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .content(objectMapper.writeValueAsString(categoryDto)))
+//                .andExpect(status().isOk());
+//    }
 
 
     @Test
+    @WithMockUser(roles = "ADMIN", username = ADMIN_USERNAME)
     void givenCategoryId_whenDeleteCategory_thenCategoryIsDeleted() throws Exception{
         String message = "Category successfully deleted!";
         when(categoryService.deleteCategory(category.getId())).thenReturn(message);
@@ -199,6 +196,7 @@ class CategoryControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN", username = ADMIN_USERNAME)
     void givenInvalidCategoryId_whenDeleteCategory_thenThrowResourceNotFoundException() throws Exception{
         var exception = getException();
         when(categoryService.deleteCategory(category.getId())).thenThrow(exception);
