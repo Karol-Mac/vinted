@@ -250,7 +250,7 @@ class CategoryControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN", username = ADMIN)
-    void givenInvalidCategoryId_whenDeleteCategory_thenThrowResourceNotFoundException() throws Exception{
+    void givenAdminUserInvalidCategoryId_whenDeleteCategory_thenThrowResourceNotFoundException() throws Exception{
         var exception = getException();
         when(categoryService.deleteCategory(category.getId())).thenThrow(exception);
 

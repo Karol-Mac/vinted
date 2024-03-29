@@ -1,6 +1,5 @@
 package com.restapi.vinted.payload;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,8 +16,10 @@ public class ClotheResponse {
 
     @JsonProperty("total pages")
     private int totalPages;
+
     @JsonProperty("page size")
     private int pageSize;
+
     @JsonProperty("is last")
     private boolean isLast;
 }
