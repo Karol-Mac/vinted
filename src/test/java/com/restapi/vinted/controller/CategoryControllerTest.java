@@ -84,7 +84,6 @@ class CategoryControllerTest {
         verify(categoryService, never()).createCategory(categoryDto);
     }
 
-
     @Test
     @WithMockUser(roles = "ADMIN", username = ADMIN)
     void givenAdminUserAndInvalidCategoryDto_whencreateCategory_thenValidationFailed() throws Exception{
@@ -142,7 +141,7 @@ class CategoryControllerTest {
     }
 
     @Test
-    void givenInvalidCategoryId_whenGetCategoryById_thenThrowResourceNotFoundException() throws Exception{
+    void givenInvalidCategoryId_whenGetCategoryById_thenResourceNotFoundExceptionisThrown() throws Exception{
         category.setId(0L);
         ResourceNotFoundException exception = getException();
 
@@ -188,7 +187,7 @@ class CategoryControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN", username = ADMIN)
-    void givenAdminUserAndInvalidCategoryId_whenUpdateCategory_thenThrowResourceNotFoundException() throws Exception{
+    void givenAdminUserAndInvalidCategoryId_whenUpdateCategory_thenResourceNotFoundExceptionisThrown() throws Exception{
         category.setId(0L);
         var exception = getException();
         when(categoryService.updateCategory(category.getId(), categoryDto)).thenThrow(exception);
@@ -250,7 +249,7 @@ class CategoryControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN", username = ADMIN)
-    void givenAdminUserInvalidCategoryId_whenDeleteCategory_thenThrowResourceNotFoundException() throws Exception{
+    void givenAdminUserInvalidCategoryId_whenDeleteCategory_thenResourceNotFoundExceptionisThrown() throws Exception{
         var exception = getException();
         when(categoryService.deleteCategory(category.getId())).thenThrow(exception);
 

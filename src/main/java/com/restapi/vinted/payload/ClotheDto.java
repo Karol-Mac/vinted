@@ -35,7 +35,7 @@ public class ClotheDto {
     @NotNull
     private ClotheSize size;
 
-    @Size(max = 5, message = Constant.IMAGE_VALIDATION_FAILED)
+    @Size(max = 5, message = Constant.IMAGES_VALIDATION_FAILED)
     private List<String> images;
 
     private long categoryId;
