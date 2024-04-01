@@ -28,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -223,11 +222,113 @@ class MyClothesControllerTest {
     }
 
     @Test
-    void upgradeClothe(){
+    @WithMockUser(username = USERNAME)
+    void givenClotheDtoAndClotheId_whenUpdateClothe_thenClotheIsUpdated() throws Exception{
+        String oldDescription = clotheDto1.getDescription();
+        ClotheSize oldSize = clotheDto1.getSize();
+        clotheDto1.setSize(ClotheSize.R40);
+        clotheDto1.setDescription("updated description");
+        when(clothesService.updateClothe(clotheDto1.getId(), clotheDto1)).thenReturn(clotheDto1);
+
+        ResultActions response =  mockMvc.perform(put(BASE_URL+"/{id}", clotheDto1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(clotheDto1))
+        );
+
+        response.andExpect(status().isOk());
+
+        ClotheDto updatedClothe = objectMapper.readValue(response.andReturn().getResponse()
+                                                                .getContentAsString(), ClotheDto.class);
+
+        assertNotEquals(updatedClothe.getDescription(), oldDescription);
+        assertNotEquals(updatedClothe.getSize(), oldSize);
+        assertEquals(updatedClothe, clotheDto1);
     }
 
     @Test
-    void deleteClothe(){
+    @WithMockUser(username = USERNAME)
+    void givenInvalidClotheId_whenUpdateClothe_thenResourceNotFoundExceptionIsThrown() throws Exception{
+        clotheDto1.setId(0L);
+        var exception = getException("Clothe", clotheDto1.getId());
+        when(clothesService.updateClothe(clotheDto1.getId(), clotheDto1)).thenThrow(exception);
+
+        ResultActions response =  mockMvc.perform(put(BASE_URL+"/{id}", clotheDto1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(clotheDto1))
+        );
+
+        response.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", is(exception.getMessage())));
+    }
+
+    @Test
+    @WithMockUser(username = USERNAME)
+    void givenInvalidClotheDto_whenUpdateClothe_thenValidationFailed() throws Exception{
+        clotheDto1.setSize(ClotheSize.R40);
+        clotheDto1.setDescription("too short");
+        clotheDto1.setPrice(BigDecimal.valueOf(-7.23));
+
+        ResultActions response =  mockMvc.perform(put(BASE_URL+"/{id}", clotheDto1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(clotheDto1))
+        );
+
+        response.andExpect(status().isBadRequest())
+                .andExpectAll(
+                        jsonPath("$.price", is(Constant.PRICE_VALIDATION_FAILED)),
+                        jsonPath("$.description", is(Constant.DESCRIPTION_VALIDATION_FAILED))
+                );
+        verify(clothesService, never()).updateClothe(clotheDto1.getId(), clotheDto1);
+    }
+
+    @Test
+    @WithMockUser(username = USERNAME)
+    void givenInvalidClotheDtoAndClotheId_whenUpdateClothe_thenValidationFailed() throws Exception{
+        clotheDto1.setSize(ClotheSize.R40);
+        clotheDto1.setDescription("too short");
+        clotheDto1.setPrice(BigDecimal.valueOf(-7.23));
+        clotheDto1.setId(0L);
+
+        ResultActions response =  mockMvc.perform(put(BASE_URL+"/{id}", clotheDto1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(clotheDto1))
+        );
+
+        response.andExpect(status().isBadRequest())
+                .andExpectAll(
+                        jsonPath("$.price", is(Constant.PRICE_VALIDATION_FAILED)),
+                        jsonPath("$.description", is(Constant.DESCRIPTION_VALIDATION_FAILED))
+                );
+        verify(clothesService, never()).updateClothe(clotheDto1.getId(), clotheDto1);
+    }
+
+    @Test
+    @WithMockUser(username = USERNAME)
+    void givenClotheId_whenDeleteClothe_thenClotheIsDeleted() throws Exception{
+        String message = "Clothe deleted successfully!";
+        when(clothesService.deleteClothe(clotheDto1.getId())).thenReturn(message);
+
+        ResultActions response =  mockMvc.perform(delete(BASE_URL+"/{id}", clotheDto1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        response.andExpect(status().isOk())
+                .andExpect(content().string(message));
+    }
+
+    @Test
+    @WithMockUser(username = USERNAME)
+    void givenInvalidClotheId_whenDeleteClothe_thenResourceNotFoundExceptionIsThrown() throws Exception{
+        clotheDto1.setId(0L);
+        var exception = getException("Clothe", clotheDto1.getId());
+        when(clothesService.deleteClothe(clotheDto1.getId())).thenThrow(exception);
+
+        ResultActions response =  mockMvc.perform(delete(BASE_URL+"/{id}", clotheDto1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        response.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", is(exception.getMessage())));
     }
 
     @NotNull

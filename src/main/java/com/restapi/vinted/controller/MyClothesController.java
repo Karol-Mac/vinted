@@ -44,8 +44,8 @@ public class MyClothesController {
 
     //upgrade clothe information
     @PutMapping("/{id}")
-    public ResponseEntity<ClotheDto> upgradeClothe(@PathVariable long id,
-                                           @RequestBody @Valid ClotheDto clotheDto){
+    public ResponseEntity<ClotheDto> updateClothe(@PathVariable long id,
+                                                  @RequestBody @Valid ClotheDto clotheDto){
         return ResponseEntity.ok(myClothesService.updateClothe(id, clotheDto));
     }
 
