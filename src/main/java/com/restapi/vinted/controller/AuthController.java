@@ -22,7 +22,7 @@ public class AuthController {
     }
 
     @PostMapping(value = {"/login", "/signin"})
-    public ResponseEntity<JwtAuthResponse> login(@RequestBody LoginDto loginDto){
+    public ResponseEntity<JwtAuthResponse> login(@RequestBody @Valid LoginDto loginDto){
         return ResponseEntity.ok(authService.login(loginDto));
     }
 
@@ -30,5 +30,4 @@ public class AuthController {
     public ResponseEntity<String> register(@RequestBody @Valid RegisterDto registerDto){
         return new ResponseEntity<>(authService.register(registerDto), HttpStatus.CREATED);
     }
-
 }
