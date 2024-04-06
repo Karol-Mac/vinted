@@ -13,9 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @ControllerAdvice
 public class VintedExceptionHandler extends ResponseEntityExceptionHandler {
@@ -56,16 +54,31 @@ public class VintedExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
 
+//    @Override
+//    public ResponseEntity<Object> handleMethodArgumentNotValid(
+//            MethodArgumentNotValidException ex, HttpHeaders headers,
+//            HttpStatusCode status, WebRequest request) {
+//
+//        Map<String, String> errors = new HashMap<>();
+//        ex.getAllErrors().forEach(error -> {
+//            String fieldName = ((FieldError)error).getField();
+//            String message = error.getDefaultMessage();
+//            errors.put(fieldName, message);
+//        });
+//
+//        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+//    }
+
     @Override
     public ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex, HttpHeaders headers,
             HttpStatusCode status, WebRequest request) {
 
-        Map<String, String> errors = new HashMap<>();
-        ex.getAllErrors().forEach(error -> {
+        Map<String, List<String>> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError)error).getField();
             String message = error.getDefaultMessage();
-            errors.put(fieldName, message);
+            errors.computeIfAbsent(fieldName, k -> new ArrayList<>()).add(message);
         });
 
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
