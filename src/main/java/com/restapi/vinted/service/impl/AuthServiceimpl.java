@@ -53,7 +53,7 @@ public class AuthServiceimpl implements AuthService {
 
             return authResponse;
         } catch (BadCredentialsException exception){
-            throw new ApiException(HttpStatus.UNAUTHORIZED, "Wrong username/email or password");
+            throw new ApiException(HttpStatus.FORBIDDEN, "Wrong username/email or password");
         }
     }
 
