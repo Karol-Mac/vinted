@@ -74,7 +74,7 @@ class AuthServiceimplTest {
         // Test & Verify
         ApiException exception = assertThrows(ApiException.class, () -> authServiceImpl.login(loginDto));
 
-        assertApiException(exception, "Wrong username/email or password", HttpStatus.UNAUTHORIZED);
+        assertApiException(exception, "Wrong username/email or password", HttpStatus.FORBIDDEN);
         verify(authenticationManager, times(1)).authenticate(
                 new UsernamePasswordAuthenticationToken(loginDto.getUsernameOrEmail(), loginDto.getPassword()));
         verify(jwtTokenProvider, never()).generateToken(any());

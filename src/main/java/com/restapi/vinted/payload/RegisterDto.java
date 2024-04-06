@@ -10,9 +10,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@NotNull
+//@NotNull
 public class RegisterDto {
-    @NotEmpty(message = "name must not be empty")
+    @NotEmpty
     private String name;
     @Size(min = 3, max = 20, message = "username need's to contain 3-20 characters")
     @NotNull
@@ -22,8 +22,8 @@ public class RegisterDto {
     private String email;
 
     @NotNull
-//    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
-//            message = "must have at least: 1 small letter, 1 uppercase letter, 1 number, " +
-//                    "1 special character & at least 8 characters (total) ")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
+            message = "must have at least: 1 small letter, 1 uppercase letter, 1 number, " +
+                    "1 special character & at least 8 characters (total) ")
     private String password;
 }
