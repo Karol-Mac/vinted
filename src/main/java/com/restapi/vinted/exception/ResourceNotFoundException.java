@@ -10,9 +10,9 @@ public class ResourceNotFoundException extends RuntimeException {
 
     private final String resource;
     private final String fieldName;
-    private final long value;
+    private final Object value;
 
-    public ResourceNotFoundException(String resource, String fieldName, long value) {
+    public ResourceNotFoundException(String resource, String fieldName, Object value) {
         super(resource+" not found with "+fieldName+" = "+ value);
         this.resource = resource;
         this.fieldName = fieldName;

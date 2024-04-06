@@ -16,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 
@@ -142,7 +141,7 @@ public class MyClothesServiceimpl implements MyClothesService {
         String usernameOrEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
         return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).orElseThrow(
-                () -> new UsernameNotFoundException("User not found with username or usernameOrEmail: "+ usernameOrEmail)
+                () -> new ResourceNotFoundException("User", "username or email", usernameOrEmail)
         );
     }
 
