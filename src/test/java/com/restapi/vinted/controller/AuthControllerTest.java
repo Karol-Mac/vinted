@@ -22,7 +22,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -112,13 +111,12 @@ class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(loginDto)));
 
         response.andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message", is(exception.getMessage())))
-                .andDo(print());
+                .andExpect(jsonPath("$.message", is(exception.getMessage())));
         verify(authService, times(1)).login(any(LoginDto.class));
     }
 
     @Test
-    void givenRedisterDto_whenRegister_thenNewUserIsCreated() throws Exception{
+    void givenRegisterDto_whenRegister_thenNewUserIsCreated() throws Exception{
         RegisterDto registerDto = new RegisterDto("user",
                                     "username", "test@email.com", "1@Qwerty");
 
@@ -131,8 +129,9 @@ class AuthControllerTest {
         response.andExpect(status().isCreated())
                 .andExpect(content().string(REGISTER_SUCCESFULLY));
     }
+
     @Test
-    void givenRedisterDtoOnSignUpPath_whenRegister_thenNewUserIsCreated() throws Exception{
+    void givenRegisterDtoOnSignUpPath_whenRegister_thenNewUserIsCreated() throws Exception{
         RegisterDto registerDto = new RegisterDto("user",
                 "username", "test@email.com", "1@Qwerty");
 
@@ -172,5 +171,37 @@ class AuthControllerTest {
                         jsonPath("$.username", is(message))
                 );
         verify(authService, never()).login(any());
+    }
+
+    @Test
+    void givenExistingUsername_whenRegister_thenApiExceptionIsThrown() throws Exception{
+        RegisterDto registerDto = new RegisterDto("existingUser",
+                "username", "test@email.com", "1@Qwerty");
+        var exception = new ApiException(HttpStatus.BAD_REQUEST, "Username is already taken");
+
+        when(authService.register(any(RegisterDto.class))).thenThrow(exception);
+
+        ResultActions response = mockMvc.perform(post(BASE_URL+"/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(registerDto)));
+
+        response.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is(exception.getMessage())));
+    }
+
+    @Test
+    void givenExistingEmail_whenRegister_thenApiExceptionIsThrown() throws Exception{
+        RegisterDto registerDto = new RegisterDto("User",
+                "username", "existingEmail@email.com", "1@Qwerty");
+        var exception = new ApiException(HttpStatus.BAD_REQUEST, "Email already exist");
+
+        when(authService.register(any(RegisterDto.class))).thenThrow(exception);
+
+        ResultActions response = mockMvc.perform(post(BASE_URL+"/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(registerDto)));
+
+        response.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is(exception.getMessage())));
     }
 }

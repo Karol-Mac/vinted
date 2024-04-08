@@ -28,7 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                                 "User not found with username or email: "+ usernameOrEmail)
                 );
 
-        //Set<Role> -> Set<GrantedAuthority>. It's mandatory to create User object <- from spring security User
+        //Set<Role> -> Set<GrantedAuthority>. It's mandatory to create a User object <- from spring security User
         Set<GrantedAuthority> authoritySet = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toSet());
 
