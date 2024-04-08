@@ -46,7 +46,6 @@ public class VintedExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorDetails> handleAccessDeniedException(
             AccessDeniedException exception, WebRequest webRequest){
@@ -54,7 +53,6 @@ public class VintedExceptionHandler extends ResponseEntityExceptionHandler {
                 webRequest.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN);
     }
-
 
     @Override
     public ResponseEntity<Object> handleMethodArgumentNotValid(

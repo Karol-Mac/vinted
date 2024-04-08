@@ -10,7 +10,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-//@NotNull
 public class RegisterDto {
     @NotEmpty
     private String name;
