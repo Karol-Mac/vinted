@@ -6,8 +6,12 @@ import com.restapi.vinted.service.MyClothesService;
 import com.restapi.vinted.utils.Constant;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 
 @RestController
@@ -19,13 +23,13 @@ public class MyClothesController {
         this.myClothesService = myClothesService;
     }
 
-    //add new clothe
-    @PostMapping
-    public ResponseEntity<ClotheDto> createClothe(@RequestBody @Valid ClotheDto clotheDto) {
-        return new ResponseEntity<>(myClothesService.createClothe(clotheDto), HttpStatus.CREATED);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ClotheDto> createClothe(@RequestPart("clothe") @Valid ClotheDto clotheDto,
+                                                  @RequestPart("images") MultipartFile[] images)
+                                                    throws IOException{
+        return new ResponseEntity<>(myClothesService.createClothe(clotheDto, images), HttpStatus.CREATED);
     }
 
-    //get all clothes with request parameters
     @GetMapping
     public ResponseEntity<ClotheResponse> getAllClothes(
             @RequestParam(required = false, defaultValue = Constant.PAGE_NO) int pageNo,
@@ -36,19 +40,16 @@ public class MyClothesController {
         return ResponseEntity.ok(myClothesService.getClothes(pageNo, pageSize, sortBy, direction));
     }
 
-    //get exact clothe
     @GetMapping("/{id}")
     public ResponseEntity<ClotheDto> getClothe(@PathVariable long id){
         return ResponseEntity.ok(myClothesService.getClotheById(id));
     }
 
-    //upgrade clothe information
     @PutMapping("/{id}")
     public ResponseEntity<ClotheDto> updateClothe(@PathVariable long id,
                                                   @RequestBody @Valid ClotheDto clotheDto){
         return ResponseEntity.ok(myClothesService.updateClothe(id, clotheDto));
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteClothe(@PathVariable long id){

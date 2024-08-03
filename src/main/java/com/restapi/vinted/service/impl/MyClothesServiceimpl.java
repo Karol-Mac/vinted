@@ -8,6 +8,7 @@ import com.restapi.vinted.payload.ClotheDto;
 import com.restapi.vinted.payload.ClotheResponse;
 import com.restapi.vinted.repository.ClotheRepository;
 import com.restapi.vinted.repository.UserRepository;
+import com.restapi.vinted.service.ImageService;
 import com.restapi.vinted.service.MyClothesService;
 import org.modelmapper.ModelMapper;
 
@@ -18,29 +19,33 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @Service
 public class MyClothesServiceimpl implements MyClothesService {
 
-    ClotheRepository clotheRepository;
+    private final ClotheRepository clotheRepository;
+    private final ImageService imageService;
+
     ModelMapper mapper;
 
     UserRepository userRepository;
 
     public final static String NOT_OWNER = "You are not the owner of this clothe";
 
-    public MyClothesServiceimpl(ClotheRepository clotheRepository,
+    public MyClothesServiceimpl(ClotheRepository clotheRepository, ImageService imageService,
                                 ModelMapper mapper, UserRepository userRepository) {
         this.clotheRepository = clotheRepository;
+        this.imageService = imageService;
         this.mapper = mapper;
         this.userRepository = userRepository;
     }
 
 
     @Override
-    public ClotheDto createClothe(ClotheDto clotheDto) {
+    public ClotheDto createClothe(ClotheDto clotheDto, MultipartFile[] images) {
         //getting logged-in user
         User user = getUser();
 
