@@ -5,6 +5,7 @@ import com.restapi.vinted.payload.ClotheResponse;
 import com.restapi.vinted.service.MyClothesService;
 import com.restapi.vinted.utils.Constant;
 import jakarta.validation.Valid;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +24,13 @@ public class MyClothesController {
         this.myClothesService = myClothesService;
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE })
     public ResponseEntity<ClotheDto> createClothe(@RequestPart("clothe") @Valid ClotheDto clotheDto,
                                                   @RequestPart("images") MultipartFile[] images)
                                                     throws IOException{
+
+//        LoggerFactory.getLogger(MyClothesController.class).error("length: {}", images.length);
+
         return new ResponseEntity<>(myClothesService.createClothe(clotheDto, images), HttpStatus.CREATED);
     }
 
