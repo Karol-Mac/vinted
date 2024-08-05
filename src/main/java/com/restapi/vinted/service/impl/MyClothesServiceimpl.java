@@ -10,9 +10,11 @@ import com.restapi.vinted.repository.ClotheRepository;
 import com.restapi.vinted.repository.UserRepository;
 import com.restapi.vinted.service.ImageService;
 import com.restapi.vinted.service.MyClothesService;
+import com.restapi.vinted.utils.Constant;
 import lombok.SneakyThrows;
 import org.modelmapper.ModelMapper;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -22,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -35,8 +36,6 @@ public class MyClothesServiceimpl implements MyClothesService {
 
     UserRepository userRepository;
 
-    public final static String NOT_OWNER = "You are not the owner of this clothe";
-
     public MyClothesServiceimpl(ClotheRepository clotheRepository, ImageService imageService,
                                 ModelMapper mapper, UserRepository userRepository) {
         this.clotheRepository = clotheRepository;
@@ -47,14 +46,19 @@ public class MyClothesServiceimpl implements MyClothesService {
 
 
     @Override
-    public ClotheDto createClothe(ClotheDto clotheDto, MultipartFile[] images) {
+    public ClotheDto createClothe(ClotheDto clotheDto, List<MultipartFile> images) {
         //getting logged-in user
         User user = getUser();
 
         Clothe clothe = mapToEntity(clotheDto);
         clothe.setUser(user);
 
-        var imageNames = Arrays.stream(images).map(imageService::saveImage).toList();
+        images.forEach(image -> LoggerFactory.getLogger(MyClothesServiceimpl.class)
+                                                .info("image name (service): {}", image.getOriginalFilename()));
+
+        var imageNames = images.stream().map(imageService::saveImage).toList();
+
+        LoggerFactory.getLogger(MyClothesServiceimpl.class).info("imageNames: {}", imageNames);
         clothe.setImages(imageNames);
 
         Clothe savedClothe = clotheRepository.save(clothe);
@@ -73,7 +77,7 @@ public class MyClothesServiceimpl implements MyClothesService {
 
         //filtering the "chosen one", by given ID
         Clothe clothe = clothes.stream().filter(clo -> clo.getId()==id).findAny()
-                .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, NOT_OWNER)
+                .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, Constant.NOT_OWNER)
                 );
 
         return mapToDto(clothe);
@@ -129,6 +133,8 @@ public class MyClothesServiceimpl implements MyClothesService {
 
         isOwner(clothe);
 
+        clothe.getImages().forEach(imageService::deleteImage);
+
         clotheRepository.delete(clothe);
 
         return "Clothe deleted successfully!";
@@ -142,7 +148,7 @@ public class MyClothesServiceimpl implements MyClothesService {
 
     private void isOwner(Clothe clothe){
         if(!clothe.getUser().equals(getUser()))
-            throw new ApiException(HttpStatus.FORBIDDEN, NOT_OWNER);
+            throw new ApiException(HttpStatus.FORBIDDEN, Constant.NOT_OWNER);
     }
 
 
@@ -161,5 +167,4 @@ public class MyClothesServiceimpl implements MyClothesService {
     private ClotheDto mapToDto(Clothe clothe){
         return mapper.map(clothe, ClotheDto.class);
     }
-
 }
