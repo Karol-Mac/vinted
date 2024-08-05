@@ -5,14 +5,12 @@ import com.restapi.vinted.payload.ClotheResponse;
 import com.restapi.vinted.service.MyClothesService;
 import com.restapi.vinted.utils.Constant;
 import jakarta.validation.Valid;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 
@@ -47,10 +45,12 @@ public class MyClothesController {
         return ResponseEntity.ok(myClothesService.getClotheById(id));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE})
     public ResponseEntity<ClotheDto> updateClothe(@PathVariable long id,
-                                                  @RequestBody @Valid ClotheDto clotheDto){
-        return ResponseEntity.ok(myClothesService.updateClothe(id, clotheDto));
+                                                  @RequestPart("clothe") @Valid ClotheDto clotheDto,
+                                                  @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages,
+                                                  @RequestPart(value = "deletedImages", required = false) List<String> deletedImages) {
+        return ResponseEntity.ok(myClothesService.updateClothe(id, clotheDto, newImages, deletedImages));
     }
 
     @DeleteMapping("/{id}")

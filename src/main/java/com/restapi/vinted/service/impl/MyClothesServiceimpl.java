@@ -11,7 +11,6 @@ import com.restapi.vinted.repository.UserRepository;
 import com.restapi.vinted.service.ImageService;
 import com.restapi.vinted.service.MyClothesService;
 import com.restapi.vinted.utils.Constant;
-import lombok.SneakyThrows;
 import org.modelmapper.ModelMapper;
 
 import org.slf4j.LoggerFactory;
@@ -111,21 +110,30 @@ public class MyClothesServiceimpl implements MyClothesService {
     }
 
     @Override
-    public ClotheDto updateClothe(long id, ClotheDto clotheDto) {
+    public ClotheDto updateClothe(long id, ClotheDto clotheDto, List<MultipartFile> newImages, List<String> deletedImages) {
         Clothe clothe = getClotheFromDB(id);
 
         isOwner(clothe);
 
         clothe.setName(clotheDto.getName());
-
         clothe.setDescription(clotheDto.getDescription());
-
         clothe.setPrice(clotheDto.getPrice());
         clothe.setSize(clotheDto.getSize());
-        clothe.setImages(clotheDto.getImages());
 
-        return mapToDto(clotheRepository.save(clothe));
+        if (newImages != null && !newImages.isEmpty()) {
+            var newImageNames = newImages.stream().map(imageService::saveImage).toList();
+            clothe.getImages().addAll(newImageNames);
+        }
+
+        if (deletedImages != null && !deletedImages.isEmpty()) {
+            clothe.getImages().removeAll(deletedImages);
+            deletedImages.forEach(imageService::deleteImage);
+        }
+
+        Clothe updatedClothe = clotheRepository.save(clothe);
+        return mapToDto(updatedClothe);
     }
+
 
     @Override
     public String deleteClothe(long id) {

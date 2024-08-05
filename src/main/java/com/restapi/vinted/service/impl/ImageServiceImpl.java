@@ -1,16 +1,11 @@
 package com.restapi.vinted.service.impl;
-import com.restapi.vinted.entity.Clothe;
-import com.restapi.vinted.entity.User;
 import com.restapi.vinted.exception.ApiException;
 import com.restapi.vinted.exception.ResourceNotFoundException;
-import com.restapi.vinted.repository.UserRepository;
 import com.restapi.vinted.service.ImageService;
-import com.restapi.vinted.utils.Constant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,11 +21,6 @@ public class ImageServiceImpl implements ImageService {
 
     @Value("${image.upload.dir}")
     private String imageDirectory;
-    private final UserRepository userRepository;
-
-    public ImageServiceImpl(UserRepository userRepository){
-        this.userRepository = userRepository;
-    }
 
     @Override
     public String saveImage(MultipartFile file){
@@ -87,18 +77,4 @@ public class ImageServiceImpl implements ImageService {
             throw new ResourceNotFoundException("File", imageName);
         }
     }
-
-//    private void isOwner(Clothe clothe){
-//        if(!clothe.getUser().equals(getUser()))
-//            throw new ApiException(HttpStatus.FORBIDDEN, Constant.NOT_OWNER);
-//    }
-//
-//
-//    private User getUser(){
-//        String usernameOrEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-//
-//        return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).orElseThrow(
-//                () -> new ResourceNotFoundException("User", "username or email", usernameOrEmail)
-//        );
-//    }
 }

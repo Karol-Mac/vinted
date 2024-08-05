@@ -12,6 +12,7 @@ public interface MyClothesService {
 
     ClotheResponse getClothes(int pageNo, int pageSize, String sortBy, String direction);
 
-    ClotheDto updateClothe(long id, ClotheDto clotheDto);
+    ClotheDto updateClothe(long id, ClotheDto clotheDto,
+                           List<MultipartFile> newImages, List<String> deletedImages);
     String deleteClothe(long id);
 }
