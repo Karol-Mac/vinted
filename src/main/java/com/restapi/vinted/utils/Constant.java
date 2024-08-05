@@ -1,6 +1,7 @@
 package com.restapi.vinted.utils;
 
 public class Constant {
+    public static final String NOT_OWNER="You are not the owner of this clothe";
     public static final String PAGE_NO="0";
     public static final String PAGE_SIZE_SMALL="5";
     public static final String PAGE_SIZE_LARGE ="15";

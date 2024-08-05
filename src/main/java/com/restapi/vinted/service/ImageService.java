@@ -11,5 +11,5 @@ public interface ImageService {
 
     Resource getImage(String imageName) throws IOException;
 
-    boolean deleteImage(String imageName) throws IOException;
+    void deleteImage(String imageName);
 }

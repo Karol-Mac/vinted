@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 
 @RestController
@@ -26,10 +27,7 @@ public class MyClothesController {
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE })
     public ResponseEntity<ClotheDto> createClothe(@RequestPart("clothe") @Valid ClotheDto clotheDto,
-                                                  @RequestPart("images") MultipartFile[] images)
-                                                    throws IOException{
-
-//        LoggerFactory.getLogger(MyClothesController.class).error("length: {}", images.length);
+                                                  @RequestPart("images") List<MultipartFile> images) {
 
         return new ResponseEntity<>(myClothesService.createClothe(clotheDto, images), HttpStatus.CREATED);
     }
