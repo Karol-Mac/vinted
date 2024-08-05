@@ -21,7 +21,7 @@ public class JwtTokenProvider{
     @Value("ad165b11320bc91501ab08613cc3a48a62a6caca4d5c8b14ca82cc313b3b96cd")
     private String jwtSecret;
 
-    @Value("3600000")
+    @Value("259200000")
     private long jwtExpirationTime;
 
     //generate JWT token
