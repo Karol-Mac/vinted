@@ -13,7 +13,6 @@ import com.restapi.vinted.service.MyClothesService;
 import com.restapi.vinted.utils.Constant;
 import org.modelmapper.ModelMapper;
 
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -52,12 +51,7 @@ public class MyClothesServiceimpl implements MyClothesService {
         Clothe clothe = mapToEntity(clotheDto);
         clothe.setUser(user);
 
-        images.forEach(image -> LoggerFactory.getLogger(MyClothesServiceimpl.class)
-                                                .info("image name (service): {}", image.getOriginalFilename()));
-
         var imageNames = images.stream().map(imageService::saveImage).toList();
-
-        LoggerFactory.getLogger(MyClothesServiceimpl.class).info("imageNames: {}", imageNames);
         clothe.setImages(imageNames);
 
         Clothe savedClothe = clotheRepository.save(clothe);

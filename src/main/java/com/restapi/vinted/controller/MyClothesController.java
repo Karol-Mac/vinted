@@ -46,10 +46,11 @@ public class MyClothesController {
     }
 
     @PutMapping(value = "/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE})
-    public ResponseEntity<ClotheDto> updateClothe(@PathVariable long id,
+    public ResponseEntity<ClotheDto> updateClothe(@PathVariable Long id,
                                                   @RequestPart("clothe") @Valid ClotheDto clotheDto,
-                                                  @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages,
-                                                  @RequestPart(value = "deletedImages", required = false) List<String> deletedImages) {
+                                                  @RequestPart(name = "newImages", required = false) List<MultipartFile> newImages,
+                                                  @RequestPart(name = "deletedImages", required = false) List<String> deletedImages) {
+
         return ResponseEntity.ok(myClothesService.updateClothe(id, clotheDto, newImages, deletedImages));
     }
 
