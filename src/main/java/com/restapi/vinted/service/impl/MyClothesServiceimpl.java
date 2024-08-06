@@ -104,9 +104,9 @@ public class MyClothesServiceimpl implements MyClothesService {
     }
 
     @Override
-    public ClotheDto updateClothe(long id, ClotheDto clotheDto, List<MultipartFile> newImages, List<String> deletedImages) {
+    public ClotheDto updateClothe(long id, ClotheDto clotheDto,
+                                  List<MultipartFile> newImages, List<String> deletedImages) {
         Clothe clothe = getClotheFromDB(id);
-
         isOwner(clothe);
 
         clothe.setName(clotheDto.getName());
@@ -123,6 +123,9 @@ public class MyClothesServiceimpl implements MyClothesService {
             clothe.getImages().removeAll(deletedImages);
             deletedImages.forEach(imageService::deleteImage);
         }
+
+        if(clothe.getImages().size() > 5)
+            throw new ApiException(HttpStatus.BAD_REQUEST, Constant.IMAGES_VALIDATION_FAILED);
 
         Clothe updatedClothe = clotheRepository.save(clothe);
         return mapToDto(updatedClothe);
