@@ -92,31 +92,89 @@ class MyClothesControllerTest {
         verify(clothesService, times(1)).createClothe(clotheDto1, List.of(imageFile1, imageFile2));
     }
 
-//    @Test
-//    @WithMockUser(username = USERNAME)
-//    void givenInvalidClotheDto_whencreateClothe_thenValidationFailed() throws Exception{
-//        clotheDto1.setName("je");
-//        clotheDto1.setPrice(BigDecimal.valueOf(-15.34));
-//        clotheDto1.setDescription("to short");
-//        clotheDto1.setImages(List.of("image1", "image2", "image3", "image4", "image5", "image6"));
-//
-//        MockMultipartFile clotheFile = new MockMultipartFile("clothe", "clothe.json",
-//                MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsString(clotheDto1).getBytes());
-//
-//        ResultActions response = mockMvc.perform(post(BASE_URL)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsString(clotheDto1)));
-//
-//        response.andExpect(status().isBadRequest())
-//                .andExpectAll(
-//                        jsonPath("$.name", is(Constant.NAME_VALIDATION_FAILED)),
-//                        jsonPath("$.description", is(Constant.DESCRIPTION_VALIDATION_FAILED)),
-//                        jsonPath("$.price", is(Constant.PRICE_VALIDATION_FAILED)),
-//                        jsonPath("$.images", is(Constant.IMAGES_VALIDATION_FAILED))
-//                );
-//
-//        verify(clothesService, never()).createClothe(clotheDto1);
-//    }
+    @Test
+    @WithMockUser(username = USERNAME)
+    void givenClotheDtoIsMissing_whencreateClothe_thenValidationFailed() throws Exception{
+        MockMultipartFile clotheFile = new MockMultipartFile("clothe", "clothe.json",
+                MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsString(clotheDto1).getBytes());
+        ResultActions response = mockMvc.perform(multipart( HttpMethod.POST,BASE_URL)
+                .file(clotheFile));
+
+        response.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Required part 'images' is not present.")));
+
+        verify(clothesService, never()).createClothe(clotheDto1, List.of());
+    }
+
+    @Test
+    @WithMockUser(username = USERNAME)
+    void givenEmptyRequestIsSend_whencreateClothe_thenValidationFailed() throws Exception{
+        ResultActions response = mockMvc.perform(multipart( HttpMethod.POST,BASE_URL));
+
+        response.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Required part 'clothe' is not present.")));
+
+        verify(clothesService, never()).createClothe(any(ClotheDto.class), any(List.class));
+    }
+
+    @Test
+    @WithMockUser(username = USERNAME)
+    void givenImageIsMissing_whencreateClothe_thenValidationFailed() throws Exception{
+        MockMultipartFile imageFile1 = new MockMultipartFile("images", "image1.jpg",
+                MediaType.IMAGE_PNG_VALUE , new byte[0]);
+        MockMultipartFile imageFile2 = new MockMultipartFile("images", "image2.png",
+                MediaType.IMAGE_JPEG_VALUE, new byte[0]);
+        ResultActions response = mockMvc.perform(multipart( HttpMethod.POST,BASE_URL)
+                .file(imageFile1)
+                .file(imageFile2));
+
+        response.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Required part 'clothe' is not present.")));
+
+        verify(clothesService, never()).createClothe(clotheDto1, List.of(imageFile1, imageFile2));
+    }
+
+    @Test
+    @WithMockUser(username = USERNAME)
+    void givenInvalidClotheDto_whencreateClothe_thenValidationFailed() throws Exception{
+        clotheDto1.setName("je");
+        clotheDto1.setPrice(BigDecimal.valueOf(-15.34));
+        clotheDto1.setDescription("to short");
+
+        MockMultipartFile clotheFile = new MockMultipartFile("clothe", "clothe.json",
+                MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsString(clotheDto1).getBytes());
+        MockMultipartFile imageFile1 = new MockMultipartFile("images", "image1.jpg",
+                MediaType.IMAGE_PNG_VALUE , new byte[0]);
+        MockMultipartFile imageFile2 = new MockMultipartFile("images", "image2.png",
+                MediaType.IMAGE_JPEG_VALUE, new byte[0]);
+        MockMultipartFile imageFile3 = new MockMultipartFile("images", "image1.jpg",
+                MediaType.IMAGE_PNG_VALUE , new byte[0]);
+        MockMultipartFile imageFile4 = new MockMultipartFile("images", "image2.png",
+                MediaType.IMAGE_JPEG_VALUE, new byte[0]);
+        MockMultipartFile imageFile5 = new MockMultipartFile("images", "image1.jpg",
+                MediaType.IMAGE_PNG_VALUE , new byte[0]);
+        MockMultipartFile imageFile6 = new MockMultipartFile("images", "image2.png",
+                MediaType.IMAGE_JPEG_VALUE, new byte[0]);
+        ResultActions response = mockMvc.perform(multipart( HttpMethod.POST,BASE_URL)
+                        .file(clotheFile)
+                        .file(imageFile1)
+                        .file(imageFile1)
+                        .file(imageFile1)
+                        .file(imageFile1)
+                        .file(imageFile1)
+                        .file(imageFile1)
+        );
+
+        response.andExpect(status().isBadRequest())
+                .andExpectAll(
+                        jsonPath("$.name", is(Constant.NAME_VALIDATION_FAILED)),
+                        jsonPath("$.description", is(Constant.DESCRIPTION_VALIDATION_FAILED)),
+                        jsonPath("$.price", is(Constant.PRICE_VALIDATION_FAILED)),
+                        jsonPath("$.images", is(Constant.IMAGES_VALIDATION_FAILED))
+                );
+
+        verify(clothesService, never()).createClothe(clotheDto1, List.of(imageFile1, imageFile2));
+    }
 //
 //    @Test
 //    @WithMockUser(username = USERNAME)
