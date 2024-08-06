@@ -6,7 +6,6 @@ import com.restapi.vinted.payload.ClotheResponse;
 import com.restapi.vinted.service.MyClothesService;
 import com.restapi.vinted.utils.Constant;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +25,9 @@ public class MyClothesController {
     }
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE })
-    public ResponseEntity<ClotheDto> createClothe(
-            @RequestPart("clothe") @Valid ClotheDto clotheDto,
-            @RequestPart("images") @Size(max = 5, message = Constant.IMAGES_VALIDATION_FAILED) @Valid List<MultipartFile> images) {
+    public ResponseEntity<ClotheDto> createClothe(@RequestPart("clothe") @Valid ClotheDto clotheDto,
+                                                  @RequestPart("images") List<MultipartFile> images) {
+        if(images.size() > 5) throw new ApiException(HttpStatus.BAD_REQUEST, Constant.IMAGES_VALIDATION_FAILED);
 
         return new ResponseEntity<>(myClothesService.createClothe(clotheDto, images), HttpStatus.CREATED);
     }
