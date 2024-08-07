@@ -54,7 +54,9 @@ public class MyClothesServiceimpl implements MyClothesService {
         var imageNames = images.stream().map(imageService::saveImage).toList();
         clothe.setImages(imageNames);
 
+        System.out.println("Before saving: " + clothe);
         Clothe savedClothe = clotheRepository.save(clothe);
+        System.out.println("After saving: " + savedClothe);
         return mapToDto(savedClothe);
     }
 
