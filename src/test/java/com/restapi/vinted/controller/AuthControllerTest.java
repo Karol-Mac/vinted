@@ -79,7 +79,8 @@ class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON));
 
         response.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.detail", is("Failed to read request")));
+                .andExpect(jsonPath("$.message",
+                        is("Request body is missing")));
         verify(authService, never()).login(any());
     }
 
@@ -151,7 +152,7 @@ class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON));
 
         response.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.detail", is("Failed to read request")));
+                .andExpect(jsonPath("$.message", is("Request body is missing")));
         verify(authService, never()).register(any());
     }
 

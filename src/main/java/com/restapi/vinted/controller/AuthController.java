@@ -1,5 +1,6 @@
 package com.restapi.vinted.controller;
 
+import com.restapi.vinted.exception.ApiException;
 import com.restapi.vinted.payload.JwtAuthResponse;
 import com.restapi.vinted.payload.LoginDto;
 import com.restapi.vinted.payload.RegisterDto;
@@ -22,12 +23,22 @@ public class AuthController {
     }
 
     @PostMapping(value = {"/login", "/signin"})
-    public ResponseEntity<JwtAuthResponse> login(@RequestBody @Valid LoginDto loginDto){
+    public ResponseEntity<JwtAuthResponse> login(
+            @RequestBody(required = false) @Valid LoginDto loginDto){
+
+        if(loginDto == null)
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Request body is missing");
+
         return ResponseEntity.ok(authService.login(loginDto));
     }
 
     @PostMapping(value = {"/register", "/signup"})
-    public ResponseEntity<String> register(@RequestBody @Valid RegisterDto registerDto){
+    public ResponseEntity<String> register(
+                    @RequestBody(required = false) @Valid RegisterDto registerDto){
+
+        if(registerDto == null)
+                    throw new ApiException(HttpStatus.BAD_REQUEST, "Request body is missing");
+
         return new ResponseEntity<>(authService.register(registerDto), HttpStatus.CREATED);
     }
 }

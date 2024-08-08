@@ -9,7 +9,6 @@ import com.restapi.vinted.utils.ClotheSize;
 import com.restapi.vinted.utils.Constant;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,7 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
-@Disabled
 class MyClothesControllerTest {
     private static final String BASE_URL = "/api/myclothes";
     private static final String USERNAME = "username";
