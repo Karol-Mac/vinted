@@ -1,331 +1,217 @@
-//package com.restapi.vinted.service;
-//
-//import com.restapi.vinted.entity.Clothe;
-//import com.restapi.vinted.entity.Role;
-//import com.restapi.vinted.entity.User;
-//import com.restapi.vinted.exception.ApiException;
-//import com.restapi.vinted.exception.ResourceNotFoundException;
-//import com.restapi.vinted.payload.ClotheDto;
-//import com.restapi.vinted.payload.ClotheResponse;
-//import com.restapi.vinted.repository.ClotheRepository;
-//import com.restapi.vinted.repository.UserRepository;
-//import com.restapi.vinted.service.impl.MyClothesServiceimpl;
-//import com.restapi.vinted.utils.ClotheSize;
-//import org.jetbrains.annotations.NotNull;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Disabled;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//import org.mockito.verification.VerificationMode;
-//import org.modelmapper.ModelMapper;
-//import org.springframework.data.domain.*;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.security.test.context.support.WithMockUser;
-//import org.springframework.test.context.junit.jupiter.SpringExtension;
-//
-//import java.math.BigDecimal;
-//import java.util.List;
-//import java.util.Optional;
-//import java.util.Set;
-//import java.util.function.Consumer;
-//
-//import static org.junit.jupiter.api.Assertions.*;
-//import static org.mockito.Mockito.*;
-//
-////FIXME: NIE DA SIĘ I CHUJ.
-//@ExtendWith({MockitoExtension.class, SpringExtension.class})
-//@Disabled
-//class MyClothesServiceimplTest {
-//    private static final String CLOTHE_NOT_FOUND = "Clothe not found with id = ";
-//    @Mock
-//    private ClotheRepository clotheRepository;
-//    @Mock
-//    private ModelMapper modelMapper;
-//    @Mock
-//    private UserRepository userRepository;
-//    @InjectMocks
-//    private MyClothesServiceimpl clothesServiceimpl;
-//
-//    private Clothe clothe;
-//    private User user;
-//    private ClotheDto clotheDto;
-//
-//    private static final String USERNAME = "testUsername";
-//
-//    @BeforeEach
-//    public void init(){
-//        user = User.builder().id(2L).email("test@email.com").username(USERNAME)
-//                .name("test").password("1234qwer")
-//                .roles(Set.of(new Role(1, "ROLE_USER")))
-//                .build();
-//
-//        clothe = Clothe.builder()
-//                        .id(2L)
-//                        .name("Newest clothe")
-//                        .description("clothe for testing")
-//                        .size(ClotheSize.R38)
-//                        .images(List.of("image1.jpg", "image2.png"))
-//                        .price(BigDecimal.valueOf(132.99))
-//                        .user(user)
-//                        .build();
-//
-//        clotheDto = ClotheDto.builder()
-//                        .id(2L)
-//                        .name("Newest clothe")
-//                        .description("clothe for testing")
-//                        .size(ClotheSize.R38)
-//                        .images(List.of("image1.jpg", "image2.png"))
-//                        .price(BigDecimal.valueOf(132.99))
-//                        .userId(user.getId())
-//                        .build();
-//    }
-//
-//    @Test
-//    @WithMockUser(username = USERNAME)
-//    void givenClotheDto_whenCreateClothe_thenClotheIsSaved(){
-//        whenUserRepository_FindByUsernameOrEmail();
-//        when(modelMapper.map(clotheDto, Clothe.class)).thenReturn(clothe);
-//        when(clotheRepository.save(clothe)).thenReturn(clothe);
-//        when(modelMapper.map(clothe, ClotheDto.class)).thenReturn(clotheDto);
-//
-//        var saved = clothesServiceimpl.createClothe(clotheDto, images);
-//
-//        assertNotNull(saved);
-//        assertEquals(saved, clotheDto);
-//        verify(userRepository, times(1)).findByUsernameOrEmail(user.getUsername(), user.getUsername());
-//        verify(clotheRepository, times(1)).save(clothe);
-//        verify(modelMapper, times(1)).map(clothe, ClotheDto.class);
-//    }
-//
-//    @Test
-//    @WithMockUser(username = USERNAME)
-//    void givenClotheId_whenGetClotheById_thenClotheIsRetrived(){
-//        whenUserRepository_FindByUsernameOrEmail();
-//        when(clotheRepository.findByUserId(user.getId())).thenReturn(List.of(clothe));
-//        when(modelMapper.map(clothe, ClotheDto.class)).thenReturn(clotheDto);
-//
-//        var foundedClothe = clothesServiceimpl.getClotheById(clothe.getId());
-//
-//        assertNotNull(foundedClothe);
-//        assertEquals(foundedClothe, clotheDto);
-//        verifygetClothe(times(1),
-//                                times(1), times(1));
-//    }
-//
-//    @Test
-//    @WithMockUser(username = USERNAME)
-//    void gicenInvalidClotheId_whenGetClotheById_thenApiExceptionIsThrown(){
-//        whenUserRepository_FindByUsernameOrEmail();
-//        when(clotheRepository.findByUserId(user.getId())).thenReturn(List.of(clothe));
-//
-//        ApiException apiException = assertThrows(ApiException.class,
-//                () -> clothesServiceimpl.getClotheById(0L));
-//
-//        assertApiException(apiException);
-//        verifygetClothe(times(1), times(1), never());
-//    }
-//
-//    @Test
-//    @WithMockUser(username = USERNAME)
-//    void givenUserIsNotTheOwner_whenGetClotheById_thenApiExceptionIsThrown(){
-//        User otherUser = User.builder().id(3L).email("test@email.com").username("otherUsername")
-//                .name("test").password("1234qwer").roles(Set.of(new Role(1, "ROLE_USER")))
-//                .build();
-//        Clothe otherClothe = Clothe.builder().id(3L).name("Newest clothe").description("clothe for testing")
-//                .size(ClotheSize.R38).images(List.of("image1.jpg", "image2.png"))
-//                .price(BigDecimal.valueOf(132.99)).user(user).build();
-//        clothe.setUser(otherUser);
-//
-//        whenUserRepository_FindByUsernameOrEmail();
-//        when(clotheRepository.findByUserId(user.getId())).thenReturn(List.of(otherClothe));
-//
-//        //method will throw an exception, because clothe with this ID isn't the user property
-//        var apiException = assertThrows(ApiException.class,
-//                () -> clothesServiceimpl.getClotheById(clothe.getId()));
-//
-//        assertApiException(apiException);
-//        verifygetClothe(times(1), times(1), never());
-//    }
-//
-//    @Test
-//    @WithMockUser(username = USERNAME)
-//    void whenGetClothes_thenClotheResponseIsRetrived(){
-//        Pageable pageable = PageRequest.of(0, 10, Sort.by("name").ascending());
-//        Page<Clothe> page = new PageImpl<>(List.of(clothe), pageable, 1);
-//
-//        whenUserRepository_FindByUsernameOrEmail();
-//        when(clotheRepository.findByUserId(user.getId(), pageable)).thenReturn(page);
-//        when(modelMapper.map(clothe, ClotheDto.class)).thenReturn(clotheDto);
-//
-//        ClotheResponse clothes = clothesServiceimpl.getClothes(0, 10, "name", "asc");
-//
-//        assertNotNull(clothes);
-//        assertTrue(clothes.getClothes().contains(clotheDto));
-//        verifygetClothe(pageable, times(1),
-//                                  times(1), times(1));
-//    }
-//
-//    @Test
-//    @WithMockUser(username = USERNAME)
-//    void givenUserDoesNotHaveCLothes_whenGetClothes_thenClotheResponseIsRetrived(){
-//        Pageable pageable = PageRequest.of(0, 10, Sort.by("name").ascending());
-//        whenUserRepository_FindByUsernameOrEmail();
-//        when(clotheRepository.findByUserId(user.getId(), pageable)).thenReturn(Page.empty());
-//
-//        var clothes = clothesServiceimpl.getClothes(0, 10, "name", "asc");
-//
-//        assertNotNull(clothes);
-//        assertTrue(clothes.getClothes().isEmpty());
-//        verifygetClothe(pageable,
-//            times(1), times(1), never());
-//    }
-//
-//    @Test
-//    @WithMockUser(username = USERNAME)
-//    void givenClotheDtoAndId_whenUpdateClothe_thenClotheIsUpdated(){
-//        clotheDto.setPrice(clotheDto.getPrice().add(BigDecimal.valueOf(15)));
-//        clotheDto.setName(clotheDto.getName() + " updated!");
-//
-//        whenClotheRepository_FindById();
-//        whenUserRepository_FindByUsernameOrEmail();
-//        when(clotheRepository.save(clothe)).thenReturn(clothe);
-//        when(modelMapper.map(clothe, ClotheDto.class)).thenReturn(clotheDto);
-//
-//        var updatedClotheDto = clothesServiceimpl.updateClothe(clothe.getId(), clotheDto);
-//
-//        assertNotNull(updatedClotheDto);
-//        assertEquals(updatedClotheDto.getName(), clothe.getName());
-//        assertEquals(updatedClotheDto.getPrice(), clothe.getPrice());
-//        verifyMocksOperations(clothe.getId(), times(1), times(1),
-//                                        repo -> verify(repo, times(1)).save(clothe));
-//        verify(modelMapper, times(1)).map(clothe, ClotheDto.class);
-//    }
-//
-//
-//    @Test
-//    void givenInvalidClotheId_whenUpdateClothe_thenResourceNotFoundExceptionItThrown(){
-//        clotheDto.setPrice(clotheDto.getPrice().add(BigDecimal.valueOf(15)));
-//        clotheDto.setName(clotheDto.getName() + " updated!");
-//        clothe.setId(0L);
-//
-//        whenClotheRepository_FindById(new ResourceNotFoundException("Clothe", "id", clothe.getId()));
-//
-//        var exception = assertThrows(ResourceNotFoundException.class,
-//                                            () -> clothesServiceimpl.updateClothe(clothe.getId(), clotheDto));
-//
-//        assertEquals(exception.getMessage(), CLOTHE_NOT_FOUND + clothe.getId());
-//        verifyMocksOperations(clothe.getId(), times(1), never(),
-//                                                    repo -> verify(repo, never()).save(clothe));
-//        verify(modelMapper, never()).map(clothe, ClotheDto.class);
-//    }
-//
-//    @Test
-//    @WithMockUser(username = USERNAME)
-//    void givenUserIsNotheOwner_whenUpdateClothe_thenApiExceptionIsThrown(){
-//        clotheDto.setPrice(clotheDto.getPrice().add(BigDecimal.valueOf(15)));
-//        clotheDto.setName(clotheDto.getName() + " updated!");
-//        User otherUser = User.builder().id(2L).email("otherUser@email.com").username("other username")
-//                        .name("otherUser").password("1234qwer")
-//                        .roles(Set.of(new Role(1, "ROLE_USER"))).build();
-//        //clothe is owned by another user
-//        clothe.setUser(otherUser);
-//        whenClotheRepository_FindById();
-//        whenUserRepository_FindByUsernameOrEmail();
-//
-//        var exception = assertThrows(ApiException.class,
-//                                () -> clothesServiceimpl.updateClothe(clothe.getId(), clotheDto));
-//
-//        assertApiException(exception);
-//        assertNotEquals(clothe.getPrice(), clotheDto.getPrice());
-//        assertNotEquals(clothe.getName(), clotheDto.getName());
-//        verifyMocksOperations(clothe.getId(), times(1), times(1),
-//                                                 repo -> verify(repo, never()).save(clothe));
-//        verify(modelMapper, never()).map(clothe, ClotheDto.class);
-//    }
-//
-//    @Test
-//    @WithMockUser(username = USERNAME)
-//    void givenClotheId_whenDeleteClothe_thenClotheIsDeleted(){
-//        whenClotheRepository_FindById();
-//        whenUserRepository_FindByUsernameOrEmail();
-//
-//        String message = clothesServiceimpl.deleteClothe(clothe.getId());
-//
-//        assertEquals(message, "Clothe deleted successfully!");
-//        verifyMocksOperations(clothe.getId(), times(1), times(1),
-//                        repo -> verify(repo, times(1)).delete(clothe));
-//    }
-//
-//    @Test
-//    @WithMockUser(username = USERNAME)
-//    void givenInvalidClotheId_whenDeleteClothe_thenResourceNotFoundExceptionIsThrown(){
-//        clothe.setId(0L);
-//        whenClotheRepository_FindById(new ResourceNotFoundException("Clothe", "id", clothe.getId()));
-//
-//        var excpetion = assertThrows(ResourceNotFoundException.class,
-//                                () -> clothesServiceimpl.deleteClothe(clothe.getId()));
-//
-//        assertEquals(excpetion.getMessage(), CLOTHE_NOT_FOUND + clothe.getId());
-//        verifyMocksOperations(clothe.getId(), times(1), never(),
-//                repo -> verify(repo, never()).delete(clothe));
-//    }
-//
-//    @Test
-//    @WithMockUser(username = USERNAME)
-//    void givenUserIsNotTheOwner_whenDeleteClothe_thenApiExceptionIsThrown(){
-//        User otherUser = User.builder().id(2L).email("otherUser@email.com")
-//                .username("other username").name("otherUser").password("1234qwer")
-//                .roles(Set.of(new Role(1, "ROLE_USER"))).build();
-//        clothe.setUser(otherUser);
-//
-//        whenClotheRepository_FindById();
-//        whenUserRepository_FindByUsernameOrEmail();
-//
-//        var exception = assertThrows(ApiException.class,
-//                                () -> clothesServiceimpl.deleteClothe(clothe.getId()));
-//
-//        assertApiException(exception);
-//        verifyMocksOperations(clothe.getId(), times(1), times(1),
-//                repo -> verify(repo, never()).delete(clothe));
-//    }
-//
-//
-//
-//
-//
-//    private void whenClotheRepository_FindById(){
-//        when(clotheRepository.findById(clothe.getId())).thenReturn(Optional.of(clothe));
-//    }
-//    private void whenClotheRepository_FindById(ResourceNotFoundException exception){
-//        when(clotheRepository.findById(clothe.getId())).thenThrow(exception);
-//    }
-//    private void whenUserRepository_FindByUsernameOrEmail(){
-//        when(userRepository.findByUsernameOrEmail(user.getUsername(),
-//                user.getUsername())).thenReturn(Optional.of(user));
-//    }
-//    private static void assertApiException(@NotNull ApiException apiException){
-//        assertEquals(apiException.getStatus(), HttpStatus.FORBIDDEN);
-//        assertEquals(apiException.getMessage(), MyClothesServiceimpl.NOT_OWNER);
-//    }
-//    private void verifygetClothe(Pageable pageable, VerificationMode verifyUser,
-//                                 VerificationMode verifyClothe, VerificationMode verifyMap){
-//        verify(userRepository, verifyUser).findByUsernameOrEmail(user.getUsername(), user.getUsername());
-//        verify(clotheRepository, verifyClothe).findByUserId(user.getId(), pageable);
-//        verify(modelMapper, verifyMap).map(clothe, ClotheDto.class);
-//    }
-//    private void verifygetClothe(VerificationMode verifyUser,
-//                                 VerificationMode verifyClothe, VerificationMode verifyMap){
-//        verify(userRepository, verifyUser).findByUsernameOrEmail(user.getUsername(), user.getUsername());
-//        verify(clotheRepository, verifyClothe).findByUserId(user.getId());
-//        verify(modelMapper, verifyMap).map(clothe, ClotheDto.class);
-//    }
-//    private void verifyMocksOperations(long clotheId, VerificationMode verifyFind,
-//                                       VerificationMode verifyUser, @NotNull Consumer<ClotheRepository> action){
-//        verify(clotheRepository, verifyFind).findById(clotheId);
-//        verify(userRepository, verifyUser).findByUsernameOrEmail(user.getUsername(), user.getUsername());
-//        action.accept(clotheRepository);
-//    }
-//}
+package com.restapi.vinted.service;
+
+
+import com.restapi.vinted.entity.Clothe;
+import com.restapi.vinted.entity.Role;
+import com.restapi.vinted.entity.User;
+import com.restapi.vinted.exception.ApiException;
+import com.restapi.vinted.payload.ClotheDto;
+import com.restapi.vinted.payload.ClotheResponse;
+import com.restapi.vinted.repository.ClotheRepository;
+import com.restapi.vinted.repository.UserRepository;
+import com.restapi.vinted.service.impl.MyClothesServiceimpl;
+import com.restapi.vinted.utils.ClotheSize;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith({MockitoExtension.class, SpringExtension.class})
+class MyClothesServiceImplTest {
+
+    @Mock
+    private ClotheRepository clotheRepository;
+
+    @Mock
+    private ImageService imageService;
+
+    @Mock(lenient = true)       //FIXME: nie może tak zostać!
+    private ModelMapper mapper;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private MyClothesServiceimpl myClothesService;
+
+    private User user;
+
+    private Clothe clothe;
+    private Clothe savedClothe;
+
+    private ClotheDto clotheDto;
+    private ClotheDto savedClotheDto;
+
+    List<MultipartFile> images;
+    List<String> imagesString;
+
+    private static final String USERNAME = "testUsername";
+
+    @BeforeEach
+    void setUp() {
+        images = List.of(new MockMultipartFile("images", "image1.jpg",
+                MediaType.MULTIPART_FORM_DATA_VALUE, new byte[0]));
+        imagesString = images.stream().map(MultipartFile::getOriginalFilename).toList();
+
+        user = User.builder().id(2L).email("test@email.com").username(USERNAME)
+                .name("test").password("1234qwer")
+                .roles(Set.of(new Role(1, "ROLE_USER")))
+                .build();
+
+        clothe = Clothe.builder()
+                .name("Newest clothe")
+                .description("clothe for testing")
+                .size(ClotheSize.R38)
+                .price(BigDecimal.valueOf(132.99))
+                .user(user)
+                .images(imagesString) // Dodano obrazy
+                .build();
+
+        savedClothe = Clothe.builder()
+                .id(2L)
+                .name("Newest clothe")
+                .description("clothe for testing")
+                .size(ClotheSize.R38)
+                .images(imagesString)
+                .price(BigDecimal.valueOf(132.99))
+                .user(user)
+                .build();
+
+        clotheDto = ClotheDto.builder()
+                .name("Newest clothe")
+                .description("clothe for testing")
+                .size(ClotheSize.R38)
+                .price(BigDecimal.valueOf(132.99))
+                .build();
+
+        savedClotheDto = ClotheDto.builder()
+                .id(2L)
+                .name("Newest clothe")
+                .description("clothe for testing")
+                .size(ClotheSize.R38)
+                .images(imagesString)
+                .price(BigDecimal.valueOf(132.99))
+                .userId(user.getId())
+                .build();
+
+        when(userRepository.findByUsernameOrEmail(USERNAME, USERNAME)).thenReturn(Optional.of(user));
+    }
+
+    @Test
+    @WithMockUser(username = USERNAME)
+    void testCreateClothe() {
+        when(mapper.map(any(ClotheDto.class), eq(Clothe.class))).thenReturn(clothe);
+        when(imageService.saveImage(any())).thenReturn("image.jpg");
+        when(clotheRepository.save(any(Clothe.class))).thenReturn(savedClothe);
+        when(mapper.map(savedClothe, ClotheDto.class)).thenReturn(savedClotheDto);
+
+        ClotheDto createdClothe = myClothesService.createClothe(clotheDto, images);
+
+        assertEquals("Newest clothe", createdClothe.getName());
+        verify(clotheRepository, times(1)).save(any(Clothe.class));
+    }
+
+
+
+    @Test
+    void testGetClotheById_WhenNotExists() {
+        when(userRepository.findByUsernameOrEmail(any(), any())).thenReturn(Optional.of(user));
+        when(clotheRepository.findByUserId(user.getId())).thenReturn(List.of());
+
+        ApiException exception = assertThrows(ApiException.class, () ->
+            myClothesService.getClotheById(1L));
+
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+    }
+
+    @Test
+    void testGetClothes() {
+        Clothe clothe = new Clothe();
+        clothe.setId(1L);
+        clothe.setName("Shirt");
+        Page<Clothe> page = new PageImpl<>(List.of(clothe));
+
+        when(userRepository.findByUsernameOrEmail(any(), any())).thenReturn(Optional.of(user));
+        when(clotheRepository.findByUserId(eq(user.getId()), any(Pageable.class))).thenReturn(page);
+        when(mapper.map(any(Clothe.class), eq(ClotheDto.class))).thenReturn(new ClotheDto());
+
+        ClotheResponse response = myClothesService.getClothes(0, 5, "name", "asc");
+
+        assertNotNull(response);
+        assertEquals(1, response.getClothes().size());
+        verify(clotheRepository, times(1)).findByUserId(eq(user.getId()), any(Pageable.class));
+    }
+
+    @Test
+    void testUpdateClothe() {
+        Clothe clothe = new Clothe();
+        clothe.setId(1L);
+        clothe.setUser(user);
+        ClotheDto clotheDto = new ClotheDto();
+        clotheDto.setName("New Shirt");
+        clotheDto.setPrice(new BigDecimal("35.50"));
+
+        when(clotheRepository.findById(anyLong())).thenReturn(Optional.of(clothe));
+        when(clotheRepository.save(any(Clothe.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(mapper.map(any(Clothe.class), eq(ClotheDto.class))).thenReturn(clotheDto);
+
+        ClotheDto updatedClothe = myClothesService.updateClothe(1L, clotheDto, null, null);
+
+        assertEquals("New Shirt", updatedClothe.getName());
+        verify(clotheRepository, times(1)).save(clothe);
+    }
+
+    @Test
+    void testDeleteClothe() {
+        Clothe clothe = new Clothe();
+        clothe.setId(1L);
+        clothe.setUser(user);
+
+        when(clotheRepository.findById(anyLong())).thenReturn(Optional.of(clothe));
+        doNothing().when(clotheRepository).delete(any(Clothe.class));
+
+        String result = myClothesService.deleteClothe(1L);
+
+        assertEquals("Clothe deleted successfully!", result);
+        verify(clotheRepository, times(1)).delete(clothe);
+    }
+
+    @Test
+    void testDeleteClothe_WhenNotOwner() {
+        User anotherUser = new User();
+        anotherUser.setId(2L);
+        Clothe clothe = new Clothe();
+        clothe.setId(1L);
+        clothe.setUser(anotherUser);
+
+        when(clotheRepository.findById(anyLong())).thenReturn(Optional.of(clothe));
+
+        ApiException exception = assertThrows(ApiException.class, () -> {
+            myClothesService.deleteClothe(1L);
+        });
+
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+        verify(clotheRepository, times(0)).delete(clothe);
+    }
+}
