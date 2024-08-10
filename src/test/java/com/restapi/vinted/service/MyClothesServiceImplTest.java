@@ -4,6 +4,7 @@ package com.restapi.vinted.service;
 import com.restapi.vinted.entity.Clothe;
 import com.restapi.vinted.entity.Role;
 import com.restapi.vinted.entity.User;
+import com.restapi.vinted.exception.ApiException;
 import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.payload.ClotheDto;
 import com.restapi.vinted.payload.ClotheResponse;
@@ -11,6 +12,7 @@ import com.restapi.vinted.repository.ClotheRepository;
 import com.restapi.vinted.repository.UserRepository;
 import com.restapi.vinted.service.impl.MyClothesServiceimpl;
 import com.restapi.vinted.utils.ClotheSize;
+import com.restapi.vinted.utils.Constant;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +25,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.multipart.MultipartFile;
 import org.mockito.MockedStatic;
 import org.springframework.security.core.Authentication;
@@ -148,8 +149,7 @@ class MyClothesServiceImplTest {
     }
 
     @Test
-    @WithMockUser(username = USERNAME)
-    void gicenInvalidClotheId_whenGetClotheById_thenApiExceptionIsThrown(){
+    void gicenInvalidClotheId_whenGetClotheById_thenResourceNotFoundExceptionIsThrown(){
         when(clotheRepository.existsById(0L)).thenReturn(false);
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
@@ -161,7 +161,23 @@ class MyClothesServiceImplTest {
         verify(mapper, never()).map(clothe, ClotheDto.class);
     }
 
+    @Test
+    void gicenUserIsNotTheOwner_whenGetClotheById_thenApiExceptionIsThrown(){
+        //clothe belong to user with different ID (different that the logged-in one)
+        clotheDto.setUserId(3L);
 
+        when(clotheRepository.existsById(clotheDto.getId())).thenReturn(true);
+        when(clotheRepository.findByUserId(user.getId())).thenReturn(List.of());
+
+        //method will throw an exception, because clothe with this ID isn't the user property
+        var apiException = assertThrows(ApiException.class,
+                () -> myClothesService.getClotheById(clotheDto.getId()));
+
+        assertEquals(apiException.getMessage(), Constant.NOT_OWNER);
+        verify(clotheRepository, times(1)).existsById(clotheDto.getId());
+        verify(clotheRepository, times(1)).findByUserId(user.getId());
+        verify(mapper, never()).map(clothe, ClotheDto.class);
+    }
 
     @Test
     void whenGetClothes_thenClotheResponseIsRetrived(){
@@ -175,8 +191,22 @@ class MyClothesServiceImplTest {
 
         assertNotNull(clothes);
         assertTrue(clothes.getClothes().contains(clotheDto));
-        verify(userRepository, times(1)).findByUsernameOrEmail(user.getUsername(), user.getUsername());
         verify(clotheRepository, times(1)).findByUserId(user.getId(), pageable);
         verify(mapper, times(1)).map(clothe, ClotheDto.class);
     }
+
+    @Test
+    void givenUserDoesNotHaveCLothes_whenGetClothes_thenClotheResponseIsRetrived(){
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("name").ascending());
+        when(clotheRepository.findByUserId(user.getId(), pageable)).thenReturn(Page.empty());
+
+        var clothes = myClothesService.getClothes(0, 10, "name", "asc");
+
+        assertNotNull(clothes);
+        assertTrue(clothes.getClothes().isEmpty());
+        verify(clotheRepository, times(1)).findByUserId(user.getId(), pageable);
+        verify(mapper, never()).map(clothe, ClotheDto.class);
+    }
+
+    //TODO: create test's for update & delete methods
 }

@@ -69,8 +69,7 @@ public class MyClothesServiceimpl implements MyClothesService {
 
         //filtering the "chosen one", by given ID
         Clothe clothe = clothes.stream().filter(clo -> clo.getId()==id).findAny()
-                .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, Constant.NOT_OWNER)
-                );
+                .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, Constant.NOT_OWNER));
 
         return mapToDto(clothe);
     }
