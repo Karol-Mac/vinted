@@ -29,10 +29,8 @@ public class MyClothesServiceimpl implements MyClothesService {
 
     private final ClotheRepository clotheRepository;
     private final ImageService imageService;
-
-    ModelMapper mapper;
-
-    UserRepository userRepository;
+    private final ModelMapper mapper;
+    private final UserRepository userRepository;
 
     public MyClothesServiceimpl(ClotheRepository clotheRepository, ImageService imageService,
                                 ModelMapper mapper, UserRepository userRepository) {
@@ -54,18 +52,17 @@ public class MyClothesServiceimpl implements MyClothesService {
         var imageNames = images.stream().map(imageService::saveImage).toList();
         clothe.setImages(imageNames);
 
-        System.out.println("Before saving: " + clothe);
         Clothe savedClothe = clotheRepository.save(clothe);
-        System.out.println("After saving: " + savedClothe);
         return mapToDto(savedClothe);
     }
 
-    //fixme: poprawić tą metodę - i potem testy do niej.
-    // powinna sprawdzać, czy ubranie o danym id wgl istnieje!
     @Override
     public ClotheDto getClotheById(long id) {
         //getting logged-in user
         User user = getUser();
+
+        if(!clotheRepository.existsById(id))
+            throw new ResourceNotFoundException("Clothe", "id", id);
 
         //getting all clothes related to logged-in user
         List<Clothe> clothes = clotheRepository.findByUserId(user.getId());

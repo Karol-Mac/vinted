@@ -161,7 +161,7 @@ class MyClothesControllerTest {
 
     @Test
     @WithMockUser(username = USERNAME)
-    void givenToManyIMages_whenCreateClothe_thenBadRequestExceptionIsThrown() throws Exception {
+    void givenToManyImages_whenCreateClothe_thenBadRequestExceptionIsThrown() throws Exception {
         MockMultipartFile clotheFile = new MockMultipartFile("clothe", "clothe.json",
                 MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsString(clotheDto1).getBytes());
         MockMultipartFile imageFile1 = new MockMultipartFile("images", "image1.jpg",
