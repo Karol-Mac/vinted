@@ -48,12 +48,13 @@ public class SecurityConfig {
         http.csrf().disable()
                 .authorizeHttpRequests(authorize ->
                      authorize
-                            .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
-                            .requestMatchers(HttpMethod.GET, "/api/clothes/**").permitAll()
-                            .requestMatchers(HttpMethod.GET, "/api/images/{imageName}").permitAll()
-                            .requestMatchers( "/api/auth/**").permitAll()
-                            .anyRequest().authenticated()
-                )
+                             .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+                             .requestMatchers("/swagger-ui/**","swagger-ui-custom.html", "/v3/api-docs/**", "/swagger-resources/**", "/swagger-ui.html", "/webjars/**", "/v2/api-docs/**").permitAll() // Dodane ścieżki dla Swaggera
+                             .requestMatchers(HttpMethod.GET, "/api/clothes/**").permitAll()
+                             .requestMatchers(HttpMethod.GET, "/api/images/{imageName}").permitAll()
+                             .requestMatchers( "/api/auth/**").permitAll()
+                             .anyRequest().authenticated()
+                            )
                 .exceptionHandling(exception ->
                         exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .sessionManagement(session ->
