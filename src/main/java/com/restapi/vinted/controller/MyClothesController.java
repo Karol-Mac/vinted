@@ -5,6 +5,7 @@ import com.restapi.vinted.payload.ClotheDto;
 import com.restapi.vinted.payload.ClotheResponse;
 import com.restapi.vinted.service.MyClothesService;
 import com.restapi.vinted.utils.Constant;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/myclothes")
+@SecurityRequirement(name = "bearerToken")
 public class MyClothesController {
     private final MyClothesService myClothesService;
 
