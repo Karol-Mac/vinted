@@ -55,10 +55,11 @@ public class ImageServiceImpl implements ImageService {
             if (resource.exists() || resource.isReadable()) {
                 return resource;
             } else {
-                throw new IOException("Could not read the file: " + imageName);
+                throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR,
+                                    "Could not read the file: " + imageName);
             }
         } else {
-            throw new IOException("File not found: " + imageName);
+            throw new ResourceNotFoundException("File",imageName);
         }
     }
 
