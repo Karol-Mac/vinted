@@ -1,10 +1,12 @@
 package com.restapi.vinted.exception;
 
 import com.restapi.vinted.payload.ErrorDetails;
+import com.restapi.vinted.utils.Constant;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
@@ -45,15 +47,16 @@ public class VintedExceptionHandler extends ResponseEntityExceptionHandler {
                 webRequest.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN);
     }
-
     @Override
-    protected ResponseEntity<Object> handleExceptionInternal(Exception ex,
-                                                             Object body,
-                                                             HttpHeaders headers,
-                                                             HttpStatusCode statusCode,
-                                                             WebRequest request){
-        ErrorDetails errorDetails = new ErrorDetails(new Date(),
-                            ex.getMessage(), request.getDescription(false));
+    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
+                                                             HttpStatusCode statusCode, WebRequest request){
+        ErrorDetails errorDetails;
+        if(ex instanceof HttpMessageNotReadableException){
+            errorDetails = new ErrorDetails(new Date(), Constant.MISSING_BODY,
+                    request.getDescription(false));
+        } else
+            errorDetails = new ErrorDetails(new Date(), ex.getMessage(), request.getDescription(false));
+
         return new ResponseEntity<>(errorDetails, statusCode);
     }
 
