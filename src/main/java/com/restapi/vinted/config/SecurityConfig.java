@@ -49,7 +49,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize ->
                      authorize
                              .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
-                             .requestMatchers("/swagger-ui/**","swagger-ui-custom.html", "/v3/api-docs/**", "/swagger-resources/**", "/swagger-ui.html", "/webjars/**", "/v2/api-docs/**").permitAll() // Dodane ścieżki dla Swaggera
                              .requestMatchers(HttpMethod.GET, "/api/clothes/**").permitAll()
                              .requestMatchers(HttpMethod.GET, "/api/images/{imageName}").permitAll()
                              .requestMatchers( "/api/auth/**").permitAll()

@@ -11,6 +11,5 @@ public class Constant {
     public final static String DESCRIPTION_VALIDATION_FAILED = "Description has to be at least 10 characters";
     public final static String PRICE_VALIDATION_FAILED = "Price has to be greater than 0";
     public final static String IMAGES_VALIDATION_FAILED = "You can choose maximally 5 images";
+    public final static String MISSING_BODY = "Request Body is missing";
 }
-
-
