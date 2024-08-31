@@ -5,4 +5,5 @@
 2. Naucz się jak DOKŁADNIE działa HTTP i HTTPS - wierz mi, nie wiesz.
 3. poczytaj dokumentację springa - tam jest na prawdę sporo rzeczy o których nie masz pojęcia
 4. Spróbuj utworzyć API w wersji 4 (na razie jest 3)
-5. Utwórz testy dla warstwy kontrolera
+5. Pomysł nowej funkcjonalności: opcja dodawania zdjęć w formie skompresowanego folderu
+6. Utwórz testy dla warstwy kontrolera
