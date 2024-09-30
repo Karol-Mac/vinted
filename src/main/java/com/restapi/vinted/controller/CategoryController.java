@@ -5,7 +5,6 @@ import com.restapi.vinted.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +19,6 @@ public class CategoryController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryDto> createCategory(@RequestBody @Valid CategoryDto categoryDto){
         return new ResponseEntity<>(categoryService.createCategory(categoryDto), HttpStatus.CREATED);
     }
@@ -37,7 +35,6 @@ public class CategoryController {
 
 
     @DeleteMapping("/{categoryId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteCategory(@PathVariable long categoryId){
         return ResponseEntity.ok(categoryService.deleteCategory(categoryId));
     }
@@ -45,10 +42,11 @@ public class CategoryController {
 
 
     @PutMapping("/{categoryId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryDto> updateCategory(@PathVariable long categoryId,
                                                        @RequestBody @Valid CategoryDto categoryDto){
 
         return ResponseEntity.ok(categoryService.updateCategory(categoryId, categoryDto));
     }
+
+
 }

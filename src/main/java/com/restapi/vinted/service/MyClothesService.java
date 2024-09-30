@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface MyClothesService {
-    ClotheDto createClothe(ClotheDto clotheDto, List<MultipartFile> images);
+    ClotheDto addClothe(ClotheDto clotheDto, List<MultipartFile> images);
     ClotheDto getClotheById(long id);
 
     ClotheResponse getClothes(int pageNo, int pageSize, String sortBy, String direction);

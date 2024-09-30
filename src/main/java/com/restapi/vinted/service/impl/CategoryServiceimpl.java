@@ -6,6 +6,7 @@ import com.restapi.vinted.payload.CategoryDto;
 import com.restapi.vinted.repository.CategoryRepository;
 import com.restapi.vinted.service.CategoryService;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,39 +24,42 @@ public class CategoryServiceimpl implements CategoryService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public CategoryDto createCategory(CategoryDto categoryDto) {
-        Category category = mapToEntity(categoryDto);
+        Category category = mapCategoryToEntity(categoryDto);
 
         Category savedCategory = categoryRepository.save(category);
 
-        return mapToDto(savedCategory);
+        return mapCategoryToDto(savedCategory);
     }
 
     @Override
     public CategoryDto getCategory(long categoryId) {
         Category category = getCategoryFromDB(categoryId);
 
-        return mapToDto(category);
+        return mapCategoryToDto(category);
     }
 
     @Override
     public List<CategoryDto> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
 
-        return categories.stream().map(this::mapToDto).toList();
+        return categories.stream().map(this::mapCategoryToDto).toList();
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public CategoryDto updateCategory(long categoryId, CategoryDto categoryDto) {
         Category category = getCategoryFromDB(categoryId);
         category.setName(categoryDto.getName());
 
         Category savedCategory = categoryRepository.save(category);
 
-        return mapToDto(savedCategory);
+        return mapCategoryToDto(savedCategory);
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public String deleteCategory(long categoryId) {
         Category category = getCategoryFromDB(categoryId);
 
@@ -71,12 +75,11 @@ public class CategoryServiceimpl implements CategoryService {
     }
 
 
-    private Category mapToEntity(CategoryDto categoryDto){
+    private Category mapCategoryToEntity(CategoryDto categoryDto){
         return mapper.map(categoryDto, Category.class);
     }
 
-    private CategoryDto mapToDto(Category category){
+    private CategoryDto mapCategoryToDto(Category category){
         return mapper.map(category, CategoryDto.class);
     }
-
 }

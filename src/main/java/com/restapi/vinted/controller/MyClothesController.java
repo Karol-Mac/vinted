@@ -29,7 +29,7 @@ public class MyClothesController {
                                                   @RequestPart("images") List<MultipartFile> images) {
         if(images.size() > 5) throw new ApiException(HttpStatus.BAD_REQUEST, Constant.IMAGES_VALIDATION_FAILED);
 
-        return new ResponseEntity<>(myClothesService.createClothe(clotheDto, images), HttpStatus.CREATED);
+        return new ResponseEntity<>(myClothesService.addClothe(clotheDto, images), HttpStatus.CREATED);
     }
 
     @GetMapping

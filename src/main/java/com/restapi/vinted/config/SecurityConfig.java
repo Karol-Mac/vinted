@@ -48,10 +48,21 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize ->
                      authorize
+                             //categories:
+                             .requestMatchers(HttpMethod.POST, "/api/categories/**").hasRole("ADMIN")
+                             .requestMatchers(HttpMethod.PUT, "/api/categories/**").hasRole("ADMIN")
+                             .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("ADMIN")
                              .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+
+                             //clothes:
+                             //everybody should be able to see clothes, pictures and be logged in/registered
                              .requestMatchers(HttpMethod.GET, "/api/clothes/**").permitAll()
-                             .requestMatchers(HttpMethod.GET, "/api/images/{imageName}").permitAll()
+                             //auth:
                              .requestMatchers( "/api/auth/**").permitAll()
+                             //images:
+                             .requestMatchers(HttpMethod.GET, "/api/images/{imageName}").permitAll()
+
+                             // my clothes should be just authenticated?
                              .anyRequest().authenticated()
                             )
                 .exceptionHandling(exception ->

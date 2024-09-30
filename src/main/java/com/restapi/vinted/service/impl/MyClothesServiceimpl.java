@@ -42,7 +42,7 @@ public class MyClothesServiceimpl implements MyClothesService {
 
 
     @Override
-    public ClotheDto createClothe(ClotheDto clotheDto, List<MultipartFile> images) {
+    public ClotheDto addClothe(ClotheDto clotheDto, List<MultipartFile> images) {
         //getting logged-in user
         User user = getUser();
 
