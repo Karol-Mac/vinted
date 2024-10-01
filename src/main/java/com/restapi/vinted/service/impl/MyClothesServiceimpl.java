@@ -17,7 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @Service
+@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 public class MyClothesServiceimpl implements MyClothesService {
 
     private final ClotheRepository clotheRepository;
@@ -42,9 +43,8 @@ public class MyClothesServiceimpl implements MyClothesService {
 
 
     @Override
-    public ClotheDto addClothe(ClotheDto clotheDto, List<MultipartFile> images) {
-        //getting logged-in user
-        User user = getUser();
+    public ClotheDto addClothe(ClotheDto clotheDto, List<MultipartFile> images, String email) {
+        User user = getUser(email);
 
         Clothe clothe = mapToEntity(clotheDto);
         clothe.setUser(user);
@@ -57,9 +57,10 @@ public class MyClothesServiceimpl implements MyClothesService {
     }
 
     @Override
-    public ClotheDto getClotheById(long id) {
+    @PreAuthorize("@myClothesServiceimpl.isOwner(#id, #email)")
+    public ClotheDto getClotheById(long id, String email) {
         //getting logged-in user
-        User user = getUser();
+        User user = getUser(email);
 
         if(!clotheRepository.existsById(id))
             throw new ResourceNotFoundException("Clothe", "id", id);
@@ -76,9 +77,9 @@ public class MyClothesServiceimpl implements MyClothesService {
 
     @Override
     public ClotheResponse getClothes(int pageNo, int pageSize, String sortBy,
-                                        String direction) {
+                                        String direction, String email) {
         //getting logged-in user
-        User user = getUser();
+        User user = getUser(email);
 
         //define the direction of sorting, and by what to sort by
         Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name()) ?
@@ -102,10 +103,11 @@ public class MyClothesServiceimpl implements MyClothesService {
     }
 
     @Override
+    @PreAuthorize("@myClothesServiceimpl.isOwner(#id, #email)")
     public ClotheDto updateClothe(long id, ClotheDto clotheDto,
-                                  List<MultipartFile> newImages, List<String> deletedImages) {
+                                  List<MultipartFile> newImages, List<String> deletedImages, String email) {
+
         Clothe clothe = getClotheFromDB(id);
-        isOwner(clothe);
 
         clothe.setName(clotheDto.getName());
         clothe.setDescription(clotheDto.getDescription());
@@ -131,17 +133,17 @@ public class MyClothesServiceimpl implements MyClothesService {
 
 
     @Override
-    public String deleteClothe(long id) {
+    @PreAuthorize("@myClothesServiceimpl.isOwner(#id, #email)")
+    public String deleteClothe(long id, String email) {
+
         Clothe clothe = getClotheFromDB(id);
-
-        isOwner(clothe);
-
         clothe.getImages().forEach(imageService::deleteImage);
 
         clotheRepository.delete(clothe);
-
         return "Clothe deleted successfully!";
     }
+
+
 
     private Clothe getClotheFromDB(long id){
         return clotheRepository.findById(id).orElseThrow(
@@ -149,18 +151,17 @@ public class MyClothesServiceimpl implements MyClothesService {
         );
     }
 
-    private void isOwner(Clothe clothe){
-        if(!clothe.getUser().equals(getUser()))
+    public boolean isOwner(long clotheId, String email){
+        var clothe = getClotheFromDB(clotheId);
+        var user = getUser(email);
+        if (!clothe.getUser().equals(user))
             throw new ApiException(HttpStatus.FORBIDDEN, Constant.NOT_OWNER);
+        return true;
     }
 
-
-    private User getUser(){
-        String usernameOrEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).orElseThrow(
-                () -> new ResourceNotFoundException("User", "username or email", usernameOrEmail)
-        );
+    private User getUser(String email){
+        return userRepository.findByEmail(email).orElseThrow(
+                        () -> new ResourceNotFoundException("User", "email", email));
     }
 
     private Clothe mapToEntity(ClotheDto clotheDto){
