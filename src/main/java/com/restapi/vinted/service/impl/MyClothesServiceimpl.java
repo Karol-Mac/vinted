@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -43,6 +44,7 @@ public class MyClothesServiceimpl implements MyClothesService {
 
 
     @Override
+    @Transactional
     public ClotheDto addClothe(ClotheDto clotheDto, List<MultipartFile> images, String email) {
         User user = getUser(email);
 
@@ -58,6 +60,7 @@ public class MyClothesServiceimpl implements MyClothesService {
 
     @Override
     @PreAuthorize("@myClothesServiceimpl.isOwner(#id, #email)")
+    @Transactional(readOnly = true)
     public ClotheDto getClotheById(long id, String email) {
         //getting logged-in user
         User user = getUser(email);
@@ -76,6 +79,7 @@ public class MyClothesServiceimpl implements MyClothesService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ClotheResponse getClothes(int pageNo, int pageSize, String sortBy,
                                         String direction, String email) {
         //getting logged-in user
@@ -104,6 +108,7 @@ public class MyClothesServiceimpl implements MyClothesService {
 
     @Override
     @PreAuthorize("@myClothesServiceimpl.isOwner(#id, #email)")
+    @Transactional
     public ClotheDto updateClothe(long id, ClotheDto clotheDto,
                                   List<MultipartFile> newImages, List<String> deletedImages, String email) {
 
@@ -134,6 +139,7 @@ public class MyClothesServiceimpl implements MyClothesService {
 
     @Override
     @PreAuthorize("@myClothesServiceimpl.isOwner(#id, #email)")
+    @Transactional
     public String deleteClothe(long id, String email) {
 
         Clothe clothe = getClotheFromDB(id);
@@ -151,6 +157,7 @@ public class MyClothesServiceimpl implements MyClothesService {
         );
     }
 
+    @Transactional(readOnly = true)
     public boolean isOwner(long clotheId, String email){
         var clothe = getClotheFromDB(clotheId);
         var user = getUser(email);

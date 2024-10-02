@@ -8,6 +8,7 @@ import com.restapi.vinted.service.CategoryService;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -49,6 +50,7 @@ public class CategoryServiceimpl implements CategoryService {
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public CategoryDto updateCategory(long categoryId, CategoryDto categoryDto) {
         Category category = getCategoryFromDB(categoryId);
         category.setName(categoryDto.getName());
@@ -60,6 +62,7 @@ public class CategoryServiceimpl implements CategoryService {
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public String deleteCategory(long categoryId) {
         Category category = getCategoryFromDB(categoryId);
 
