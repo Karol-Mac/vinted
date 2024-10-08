@@ -26,7 +26,7 @@ public class ClotheController {
                                         @RequestParam(required = false, defaultValue = Constant.DIRECTION) String direction){
 
         return Objects.isNull(clotheId) ?
-                ResponseEntity.ok(clotheService.getClothesRelatedToCategory(categoryId, pageNo, pageSize, sortBy, direction)) :
+                ResponseEntity.ok(clotheService.getAllClothesByCategory(categoryId, pageNo, pageSize, sortBy, direction)) :
                 ResponseEntity.ok(clotheService.getClotheByCategory(categoryId, clotheId));
     }
 }

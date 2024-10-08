@@ -36,8 +36,8 @@ public class ClotheServiceimpl implements ClotheService {
     }
 
     @Override
-    public ClotheResponse getClothesRelatedToCategory(long categoryId,
-                                           int pageNo, int pageSize, String sortBy, String direction){
+    public ClotheResponse getAllClothesByCategory(long categoryId,
+                                                  int pageNo, int pageSize, String sortBy, String direction){
 
         //create Sort, and Page object
         Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name()) ?
