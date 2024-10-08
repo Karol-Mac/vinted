@@ -49,10 +49,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize ->
                      authorize
                              //categories:
-                             .requestMatchers(HttpMethod.POST, "/api/categories/**").hasRole("ADMIN")
-                             .requestMatchers(HttpMethod.PUT, "/api/categories/**").hasRole("ADMIN")
-                             .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("ADMIN")
                              .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+                             .requestMatchers("/api/categories/**").hasRole("ADMIN")
 
                              //clothes:
                              //everybody should be able to see clothes, pictures and be logged in/registered
