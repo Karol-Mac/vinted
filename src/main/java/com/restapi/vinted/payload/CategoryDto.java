@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class CategoryDto {
     private long id;
 
-    @Size(min = 3, message = Constant.NAME_VALIDATION_FAILED)
     @NotNull(message = "category name can not be null")
+    @Size(min = 3, max = 50, message = Constant.NAME_VALIDATION_FAILED)
     private String name;
 }

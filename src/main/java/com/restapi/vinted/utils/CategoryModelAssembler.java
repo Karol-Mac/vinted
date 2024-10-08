@@ -17,9 +17,11 @@ public class CategoryModelAssembler implements RepresentationModelAssembler<Cate
 
     @Override
     public EntityModel<CategoryDto> toModel(CategoryDto entity){
-
-        var selfLink = linkTo(methodOn(CategoryController.class).getCategoryById(entity.getId())).withSelfRel();
+        var selfLink = linkTo(methodOn(CategoryController.class).getCategoryById(entity.getId())).withSelfRel()
+                .andAffordance(afford(methodOn(CategoryController.class).updateCategory(entity.getId(), null)))
+                .andAffordance(afford(methodOn(CategoryController.class).deleteCategory(entity.getId())));
         var allLinks = linkTo(methodOn(CategoryController.class).getAllCategories()).withRel("allCategories");
+
 
         return EntityModel.of(entity, selfLink, allLinks);
     }
@@ -30,7 +32,8 @@ public class CategoryModelAssembler implements RepresentationModelAssembler<Cate
         var models = StreamSupport.stream(entities.spliterator(), false)
                                     .map(this::toModel)
                                     .toList();
-        var selfLinks = linkTo(methodOn(CategoryController.class).getAllCategories()).withSelfRel();
+        var selfLinks = linkTo(methodOn(CategoryController.class).getAllCategories()).withSelfRel()
+                .andAffordance(afford(methodOn(CategoryController.class).createCategory(null)));
 
         return CollectionModel.of(models, selfLinks);
     }

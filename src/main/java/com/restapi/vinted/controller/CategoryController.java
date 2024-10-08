@@ -6,9 +6,11 @@ import com.restapi.vinted.utils.CategoryModelAssembler;
 import jakarta.validation.Valid;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
 
 
 @RestController
@@ -23,8 +25,11 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<CategoryDto> createCategory(@RequestBody @Valid CategoryDto categoryDto){
-        return new ResponseEntity<>(categoryService.createCategory(categoryDto), HttpStatus.CREATED);
+    public ResponseEntity<EntityModel<CategoryDto>> createCategory(@RequestBody @Valid CategoryDto categoryDto){
+
+        var category = categoryService.createCategory(categoryDto);
+
+        return ResponseEntity.created(getLocation(category.getId())).body(assembler.toModel(category));
     }
 
     @GetMapping
@@ -39,6 +44,13 @@ public class CategoryController {
         return ResponseEntity.ok(assembler.toModel(category));
     }
 
+    @PutMapping("/{categoryId}")
+    public ResponseEntity<EntityModel<CategoryDto>> updateCategory(@PathVariable long categoryId,
+                                                      @RequestBody @Valid CategoryDto categoryDto){
+
+        var updatedCategory = categoryService.updateCategory(categoryId, categoryDto);
+        return ResponseEntity.ok(assembler.toModel(updatedCategory));
+    }
 
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<String> deleteCategory(@PathVariable long categoryId){
@@ -46,14 +58,11 @@ public class CategoryController {
         return ResponseEntity.noContent().build();
     }
 
-
-
-    @PutMapping("/{categoryId}")
-    public ResponseEntity<CategoryDto> updateCategory(@PathVariable long categoryId,
-                                                       @RequestBody @Valid CategoryDto categoryDto){
-
-        return ResponseEntity.ok(categoryService.updateCategory(categoryId, categoryDto));
+    private URI getLocation(Object resourceId) {
+        return ServletUriComponentsBuilder
+                .fromCurrentRequestUri()
+                .path("/{resourceId}")
+                .buildAndExpand(resourceId)
+                .toUri();
     }
-
-
 }
