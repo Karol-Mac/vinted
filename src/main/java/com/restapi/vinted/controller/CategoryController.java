@@ -2,20 +2,24 @@ package com.restapi.vinted.controller;
 
 import com.restapi.vinted.payload.CategoryDto;
 import com.restapi.vinted.service.CategoryService;
+import com.restapi.vinted.utils.CategoryModelAssembler;
 import jakarta.validation.Valid;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/categories")
 public class CategoryController {
     private final CategoryService categoryService;
+    private final CategoryModelAssembler assembler;
 
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(CategoryService categoryService, CategoryModelAssembler assembler) {
         this.categoryService = categoryService;
+        this.assembler = assembler;
     }
 
     @PostMapping
@@ -24,19 +28,22 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryDto>> getAllCategories(){
-        return ResponseEntity.ok(categoryService.getAllCategories());
+    public ResponseEntity<CollectionModel<EntityModel<CategoryDto>>> getAllCategories(){
+        var categories = categoryService.getAllCategories();
+        return ResponseEntity.ok(assembler.toCollectionModel(categories));
     }
 
     @GetMapping("/{categoryId}")
-    public ResponseEntity<CategoryDto> getCategoryById(@PathVariable long categoryId){
-        return ResponseEntity.ok(categoryService.getCategory(categoryId));
+    public ResponseEntity<EntityModel<CategoryDto>> getCategoryById(@PathVariable long categoryId){
+        var category = categoryService.getCategory(categoryId);
+        return ResponseEntity.ok(assembler.toModel(category));
     }
 
 
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<String> deleteCategory(@PathVariable long categoryId){
-        return ResponseEntity.ok(categoryService.deleteCategory(categoryId));
+        categoryService.deleteCategory(categoryId);
+        return ResponseEntity.noContent().build();
     }
 
 
