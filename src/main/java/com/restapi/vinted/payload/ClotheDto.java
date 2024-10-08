@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -21,11 +22,11 @@ public class ClotheDto {
     private long id;
 
     @NotNull
-    @Size(min = 3, message = Constant.NAME_VALIDATION_FAILED)
+    @Length(min = 3, message = Constant.NAME_VALIDATION_FAILED)
     private String name;
 
     @NotNull
-    @Size(min = 10, message = Constant.DESCRIPTION_VALIDATION_FAILED)
+    @Length(min = 10, message = Constant.DESCRIPTION_VALIDATION_FAILED)
     private String description;
 
     @NotNull
