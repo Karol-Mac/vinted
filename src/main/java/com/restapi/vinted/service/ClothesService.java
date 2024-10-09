@@ -6,9 +6,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-public interface MyClothesService {
+public interface ClothesService {
 
+    ClotheResponse getAllClothesByCategory(long categoryId, int pageNo, int pageSize, String sortBy, String direction);
 
+    ClotheDto getClotheById(long clotheId);
 
     ClotheDto addClothe(ClotheDto clotheDto, List<MultipartFile> images, String email);
 

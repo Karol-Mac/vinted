@@ -3,8 +3,7 @@ package com.restapi.vinted.controller;
 import com.restapi.vinted.exception.ApiException;
 import com.restapi.vinted.payload.ClotheDto;
 import com.restapi.vinted.payload.ClotheResponse;
-import com.restapi.vinted.service.ClotheService;
-import com.restapi.vinted.service.MyClothesService;
+import com.restapi.vinted.service.ClothesService;
 import com.restapi.vinted.utils.Constant;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -19,13 +18,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/clothes")
 public class ClotheController {
-    private final ClotheService clotheService;
-    private final MyClothesService myClothesService;
+    private final ClothesService clothesService;
 
 
-    public ClotheController(ClotheService clotheService, MyClothesService myClothesService) {
-        this.clotheService = clotheService;
-        this.myClothesService = myClothesService;
+    public ClotheController(ClothesService clothesService) {
+        this.clothesService = clothesService;
     }
 
     @GetMapping("/category/{categoryId}")
@@ -37,25 +34,25 @@ public class ClotheController {
                                         @RequestParam(required = false, defaultValue = Constant.DIRECTION) String direction){
 
         return ResponseEntity.ok(
-                clotheService.getAllClothesByCategory(categoryId, pageNo, pageSize, sortBy, direction));
+                clothesService.getAllClothesByCategory(categoryId, pageNo, pageSize, sortBy, direction));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ClotheDto> getClothe(@PathVariable long id){
-        return ResponseEntity.ok(clotheService.getClotheById(id));
+        return ResponseEntity.ok(clothesService.getClotheById(id));
     }
 
 
     //OWNER-ONLY ACTIONS
     @GetMapping("/my")
-    public ResponseEntity<ClotheResponse> getAllClothes(
+    public ResponseEntity<ClotheResponse> getAllUserClothes(
             @RequestParam(required = false, defaultValue = Constant.PAGE_NO) int pageNo,
             @RequestParam(required = false, defaultValue = Constant.PAGE_SIZE_SMALL) int pageSize,
             @RequestParam(required = false, defaultValue = Constant.SORT_BY) String sortBy,
             @RequestParam(required = false, defaultValue = Constant.DIRECTION) String direction,
             Principal principal) {
 
-        return ResponseEntity.ok(myClothesService.getMyClothes(pageNo, pageSize, sortBy, direction, principal.getName()));
+        return ResponseEntity.ok(clothesService.getMyClothes(pageNo, pageSize, sortBy, direction, principal.getName()));
     }
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE })
@@ -64,7 +61,7 @@ public class ClotheController {
                                                   Principal principal) {
         if(images.size() > 5) throw new ApiException(HttpStatus.BAD_REQUEST, Constant.IMAGES_VALIDATION_FAILED);
 
-        return new ResponseEntity<>(myClothesService.addClothe(clotheDto, images, principal.getName()), HttpStatus.CREATED);
+        return new ResponseEntity<>(clothesService.addClothe(clotheDto, images, principal.getName()), HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE})
@@ -74,11 +71,11 @@ public class ClotheController {
                                                   @RequestPart(name = "deletedImages", required = false) List<String> deletedImages,
                                                   Principal principal) {
 
-        return ResponseEntity.ok(myClothesService.updateClothe(id, clotheDto, newImages, deletedImages, principal.getName()));
+        return ResponseEntity.ok(clothesService.updateClothe(id, clotheDto, newImages, deletedImages, principal.getName()));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteClothe(@PathVariable long id, Principal principal){
-        return ResponseEntity.ok(myClothesService.deleteClothe(id, principal.getName()));
+        return ResponseEntity.ok(clothesService.deleteClothe(id, principal.getName()));
     }
 }
