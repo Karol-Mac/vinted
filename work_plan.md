@@ -6,6 +6,7 @@
  - zwieksz poziom API na 3 - żeby działało jak strona internetowa
 
  - dodatkowe funkcje:
+   - płatności !!!
    - komunikacja między użytkownikami (Rabbit MQ ???)
    - system ocen/opinii użytkowników (po zakupie ubrań)
  
