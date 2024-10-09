@@ -1,8 +1,6 @@
 package com.restapi.vinted.service.impl;
 
-import com.restapi.vinted.entity.Category;
 import com.restapi.vinted.entity.Clothe;
-import com.restapi.vinted.exception.ApiException;
 import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.payload.ClotheDto;
 import com.restapi.vinted.payload.ClotheResponse;
@@ -14,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -36,8 +33,8 @@ public class ClotheServiceimpl implements ClotheService {
     }
 
     @Override
-    public ClotheResponse getAllClothesByCategory(long categoryId,
-                                                  int pageNo, int pageSize, String sortBy, String direction){
+    public ClotheResponse getAllClothesByCategory(long categoryId, int pageNo, int pageSize,
+                                                        String sortBy, String direction){
 
         //create Sort, and Page object
         Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name()) ?
@@ -46,7 +43,9 @@ public class ClotheServiceimpl implements ClotheService {
         Pageable page = PageRequest.of(pageNo, pageSize, sort);
 
         //create Page<Clothe> with custom DB method
-        getCategory(categoryId);
+        categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
+
         Page<Clothe> clothes = clotheRepository.findByCategoryId(categoryId, page);
 
         //Create ClotheResponse - give more info to client
@@ -63,21 +62,12 @@ public class ClotheServiceimpl implements ClotheService {
     }
 
     @Override
-    public ClotheDto getClotheByCategory(long categoryId, long clotheId) {
-        Category category = getCategory(categoryId);
+    public ClotheDto getClotheById(long clotheId) {
 
         Clothe clothe = clotheRepository.findById(clotheId)
                 .orElseThrow( ()-> new ResourceNotFoundException("Clothe", "id", clotheId));
 
-        if(clothe.getCategory().getId() != category.getId())
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Clothe does not belong to this category");
-
         return mapToDto(clothe);
-    }
-
-    private Category getCategory(long categoryId){
-        return categoryRepository.findById(categoryId)
-                .orElseThrow( ()-> new ResourceNotFoundException("Category", "id", categoryId));
     }
 
     private ClotheDto mapToDto(Clothe clothe){

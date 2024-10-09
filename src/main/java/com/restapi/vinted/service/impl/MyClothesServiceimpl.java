@@ -59,29 +59,9 @@ public class MyClothesServiceimpl implements MyClothesService {
     }
 
     @Override
-    @PreAuthorize("@myClothesServiceimpl.isOwner(#id, #email)")
     @Transactional(readOnly = true)
-    public ClotheDto getClotheById(long id, String email) {
-        //getting logged-in user
-        User user = getUser(email);
-
-        if(!clotheRepository.existsById(id))
-            throw new ResourceNotFoundException("Clothe", "id", id);
-
-        //getting all clothes related to logged-in user
-        List<Clothe> clothes = clotheRepository.findByUserId(user.getId());
-
-        //filtering the "chosen one", by given ID
-        Clothe clothe = clothes.stream().filter(clo -> clo.getId()==id).findAny()
-                .orElseThrow(() -> new ApiException(HttpStatus.FORBIDDEN, Constant.NOT_OWNER));
-
-        return mapToDto(clothe);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public ClotheResponse getClothes(int pageNo, int pageSize, String sortBy,
-                                        String direction, String email) {
+    public ClotheResponse getMyClothes(int pageNo, int pageSize, String sortBy,
+                                       String direction, String email) {
         //getting logged-in user
         User user = getUser(email);
 
