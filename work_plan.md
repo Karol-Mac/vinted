@@ -6,7 +6,8 @@
    -[ ] dodanie zamówień
      -[ ] system ocen/opinii użytkowników (po zakupie ubrań)
      -[ ] komunikacja między użytkownikami wysyłanie powiadomienia do sprzedawcy po zakupie jego ubrania
-       (zrób oddzielny serwis do wysyłania mailu/SMS-ów <- użyj do komunikacji RabbitMQ)
+       (zrób oddzielny serwis do wysyłania mailu/SMS-ów)
+       - Tech stack: RabbitMQ, JavaMailSender i Twilio
    -[ ] płatności !!!
 
 -[ ] zwieksz poziom API na 3 - żeby działało jak strona internetowa

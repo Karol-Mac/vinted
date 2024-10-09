@@ -61,7 +61,8 @@ public class AuthServiceimpl implements AuthService {
     private JwtAuthResponse createAuthResponse(User user, Authentication authentication) {
         JwtAuthResponse authResponse = new JwtAuthResponse();
         authResponse.setAccessToken(jwtTokenProvider.generateToken(authentication));
-        authResponse.setRole(user.getRoles().toString());
+        var roles = user.getRoles().stream().map(Role::getName).toList();
+        authResponse.setRole(roles.toString());
         authResponse.setUserId(user.getId());
         authResponse.setUsernameOrEmail(authentication.getName());
 

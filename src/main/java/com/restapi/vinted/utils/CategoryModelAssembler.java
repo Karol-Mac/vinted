@@ -14,7 +14,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 @Component
 public class CategoryModelAssembler implements RepresentationModelAssembler<CategoryDto, EntityModel<CategoryDto>> {
 
-
+    //FIXME: pola clothesCount, createdAt, updatedAt powinny być ignorowane w zapytaniu PUT i POST
     @Override
     public EntityModel<CategoryDto> toModel(CategoryDto entity){
         var selfLink = linkTo(methodOn(CategoryController.class).getCategoryById(entity.getId())).withSelfRel()

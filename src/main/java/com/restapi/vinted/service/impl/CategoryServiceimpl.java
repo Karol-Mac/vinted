@@ -5,7 +5,6 @@ import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.payload.CategoryDto;
 import com.restapi.vinted.repository.CategoryRepository;
 import com.restapi.vinted.service.CategoryService;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,18 +14,16 @@ import java.util.List;
 @Service
 public class CategoryServiceimpl implements CategoryService {
 
-    CategoryRepository categoryRepository;
-    ModelMapper mapper;
+    private final CategoryRepository categoryRepository;
 
-    public CategoryServiceimpl(CategoryRepository categoryRepository,
-                               ModelMapper mapper) {
+    public CategoryServiceimpl(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
-        this.mapper = mapper;
     }
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public CategoryDto createCategory(CategoryDto categoryDto) {
+
         Category category = mapCategoryToEntity(categoryDto);
 
         Category savedCategory = categoryRepository.save(category);
@@ -79,10 +76,23 @@ public class CategoryServiceimpl implements CategoryService {
 
 
     private Category mapCategoryToEntity(CategoryDto categoryDto){
-        return mapper.map(categoryDto, Category.class);
+        var category = new Category();
+        category.setName(categoryDto.getName());
+        category.setDescription(categoryDto.getDescription());
+
+        return category;
     }
 
     private CategoryDto mapCategoryToDto(Category category){
-        return mapper.map(category, CategoryDto.class);
+        var categoryDto = new CategoryDto();
+        categoryDto.setId(category.getId());
+        categoryDto.setName(category.getName());
+        categoryDto.setDescription(category.getDescription());
+        categoryDto.setCreatedAt(category.getCreatedAt());
+        categoryDto.setUpdatedAt(category.getUpdatedAt());
+        var clothes = category.getClothes()==null ? 0 : category.getClothes().size();
+        categoryDto.setClothesCount(clothes);
+
+        return categoryDto;
     }
 }
