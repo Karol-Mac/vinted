@@ -48,14 +48,24 @@ public class AuthServiceimpl implements AuthService {
                     loginDto.getUsernameOrEmail(), loginDto.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            //returning generated token (when user is authenticated)
-            JwtAuthResponse authResponse = new JwtAuthResponse();
-            authResponse.setAccessToken(jwtTokenProvider.generateToken(authentication));
+            User user = userRepository.findByUsernameOrEmail(loginDto.getUsernameOrEmail(),
+                                                            loginDto.getUsernameOrEmail()).get();
 
-            return authResponse;
+            return createAuthResponse(user, authentication);
+
         } catch (BadCredentialsException exception){
             throw new ApiException(HttpStatus.FORBIDDEN, "Wrong username/email or password");
         }
+    }
+
+    private JwtAuthResponse createAuthResponse(User user, Authentication authentication) {
+        JwtAuthResponse authResponse = new JwtAuthResponse();
+        authResponse.setAccessToken(jwtTokenProvider.generateToken(authentication));
+        authResponse.setRole(user.getRoles().toString());
+        authResponse.setUserId(user.getId());
+        authResponse.setUsernameOrEmail(authentication.getName());
+
+        return authResponse;
     }
 
     @Override
