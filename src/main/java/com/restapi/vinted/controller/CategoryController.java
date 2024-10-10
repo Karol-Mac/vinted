@@ -1,6 +1,7 @@
 package com.restapi.vinted.controller;
 
 import com.restapi.vinted.payload.CategoryDto;
+import com.restapi.vinted.payload.CategoryEdditDto;
 import com.restapi.vinted.service.CategoryService;
 import com.restapi.vinted.utils.CategoryModelAssembler;
 import jakarta.validation.Valid;
@@ -25,7 +26,7 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<EntityModel<CategoryDto>> createCategory(@RequestBody @Valid CategoryDto categoryDto){
+    public ResponseEntity<EntityModel<CategoryDto>> createCategory(@RequestBody @Valid CategoryEdditDto categoryDto){
 
         var category = categoryService.createCategory(categoryDto);
 
@@ -46,7 +47,7 @@ public class CategoryController {
 
     @PutMapping("/{categoryId}")
     public ResponseEntity<EntityModel<CategoryDto>> updateCategory(@PathVariable long categoryId,
-                                                      @RequestBody @Valid CategoryDto categoryDto){
+                                                      @RequestBody @Valid CategoryEdditDto categoryDto){
 
         var updatedCategory = categoryService.updateCategory(categoryId, categoryDto);
         return ResponseEntity.ok(assembler.toModel(updatedCategory));

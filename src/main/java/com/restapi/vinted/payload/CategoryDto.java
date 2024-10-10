@@ -10,6 +10,7 @@ import java.time.ZonedDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CategoryDto {
+
     private long id;
 
     private String name;

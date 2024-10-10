@@ -3,6 +3,7 @@ package com.restapi.vinted.service.impl;
 import com.restapi.vinted.entity.Category;
 import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.payload.CategoryDto;
+import com.restapi.vinted.payload.CategoryEdditDto;
 import com.restapi.vinted.repository.CategoryRepository;
 import com.restapi.vinted.service.CategoryService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +23,7 @@ public class CategoryServiceimpl implements CategoryService {
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
-    public CategoryDto createCategory(CategoryDto categoryDto) {
+    public CategoryDto createCategory(CategoryEdditDto categoryDto) {
 
         Category category = mapCategoryToEntity(categoryDto);
 
@@ -48,9 +49,10 @@ public class CategoryServiceimpl implements CategoryService {
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public CategoryDto updateCategory(long categoryId, CategoryDto categoryDto) {
+    public CategoryDto updateCategory(long categoryId, CategoryEdditDto categoryDto) {
         Category category = getCategoryFromDB(categoryId);
         category.setName(categoryDto.getName());
+        category.setDescription(categoryDto.getDescription());
 
         Category savedCategory = categoryRepository.save(category);
 
@@ -74,8 +76,7 @@ public class CategoryServiceimpl implements CategoryService {
         );
     }
 
-
-    private Category mapCategoryToEntity(CategoryDto categoryDto){
+    private Category mapCategoryToEntity(CategoryEdditDto categoryDto){
         var category = new Category();
         category.setName(categoryDto.getName());
         category.setDescription(categoryDto.getDescription());
