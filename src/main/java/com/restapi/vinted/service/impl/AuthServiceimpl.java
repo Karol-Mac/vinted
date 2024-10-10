@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -47,17 +48,29 @@ public class AuthServiceimpl implements AuthService {
                     loginDto.getUsernameOrEmail(), loginDto.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            //returning generated token (when user is authenticated)
-            JwtAuthResponse authResponse = new JwtAuthResponse();
-            authResponse.setAccessToken(jwtTokenProvider.generateToken(authentication));
+            User user = userRepository.findByUsernameOrEmail(loginDto.getUsernameOrEmail(),
+                                                            loginDto.getUsernameOrEmail()).get();
 
-            return authResponse;
+            return createAuthResponse(user, authentication);
+
         } catch (BadCredentialsException exception){
             throw new ApiException(HttpStatus.FORBIDDEN, "Wrong username/email or password");
         }
     }
 
+    private JwtAuthResponse createAuthResponse(User user, Authentication authentication) {
+        JwtAuthResponse authResponse = new JwtAuthResponse();
+        authResponse.setAccessToken(jwtTokenProvider.generateToken(authentication));
+        var roles = user.getRoles().stream().map(Role::getName).toList();
+        authResponse.setRole(roles.toString());
+        authResponse.setUserId(user.getId());
+        authResponse.setUsernameOrEmail(authentication.getName());
+
+        return authResponse;
+    }
+
     @Override
+    @Transactional
     public String register(RegisterDto registerDto) {
 
         //check if username and email already exist in DB
