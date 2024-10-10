@@ -52,15 +52,13 @@ public class SecurityConfig {
                              .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                              .requestMatchers("/api/categories/**").hasRole("ADMIN")
 
-                             //clothes:
-                             //everybody should be able to see clothes, pictures and be logged in/registered
-                             .requestMatchers(HttpMethod.GET, "/api/clothes/**").permitAll()
                              //auth:
                              .requestMatchers( "/api/auth/**").permitAll()
                              //images:
                              .requestMatchers(HttpMethod.GET, "/api/images/{imageName}").permitAll()
 
-                             // my clothes should be just authenticated?
+                             //clothes:
+                             .requestMatchers(HttpMethod.GET, "/api/clothes/**").permitAll()
                              .anyRequest().authenticated()
                             )
                 .exceptionHandling(exception ->

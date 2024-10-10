@@ -14,8 +14,6 @@ import com.restapi.vinted.service.ClothesService;
 import com.restapi.vinted.utils.Constant;
 import org.modelmapper.ModelMapper;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -26,13 +24,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 public class ClothesServiceimpl implements ClothesService {
 
-    private static final Logger log = LoggerFactory.getLogger(ClothesServiceimpl.class);
     private final ClotheRepository clotheRepository;
     private final ImageService imageService;
     private final ModelMapper mapper;
@@ -51,6 +50,7 @@ public class ClothesServiceimpl implements ClothesService {
 
 
     @Override
+    @PreAuthorize("permitAll()")
     public ClotheResponse getAllClothesByCategory(long categoryId, int pageNo, int pageSize,
                                                   String sortBy, String direction){
 
@@ -71,15 +71,16 @@ public class ClothesServiceimpl implements ClothesService {
 
     @Override
     @Transactional
-    public ClotheDto getClotheById(long clotheId, String email) {
-
-        log.warn("Principal's name: {}", email);
+    @PreAuthorize("permitAll()")
+    public ClotheDto getClotheById(long clotheId, Optional<Principal> principal) {
 
         Clothe clothe = clotheRepository.findById(clotheId)
                 .orElseThrow( ()-> new ResourceNotFoundException("Clothe", "id", clotheId));
 
-        //increment view's count if any user (expect the owner) looks at clothing
-        if(!clothe.getUser().equals(getUser(email))){
+        //update of view's field:
+        if(principal.isEmpty() || (
+                    principal.isPresent() &&
+                    !clothe.getUser().equals(getUser(principal.get().getName())))) {
             clothe.setViews(clothe.getViews() + 1);
             clotheRepository.save(clothe);
         }
@@ -136,6 +137,11 @@ public class ClothesServiceimpl implements ClothesService {
         clothe.setDescription(clotheDto.getDescription());
         clothe.setPrice(clotheDto.getPrice());
         clothe.setSize(clotheDto.getSize());
+        clothe.setMaterial(clotheDto.getMaterial());
+
+        //user may (theoretically) want to change the category of his clothing
+        clothe.setCategory(categoryRepository.findById(clotheDto.getCategoryId())
+                .orElseThrow( () -> new ResourceNotFoundException("Category", "id", clotheDto.getId())));
 
         updateImages(clothe, newImages, deletedImages);
 

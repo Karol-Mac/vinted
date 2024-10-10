@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/clothes")
@@ -39,7 +40,7 @@ public class ClotheController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ClotheDto> getClothe(@PathVariable long id, Principal principal){
-        return ResponseEntity.ok(clothesService.getClotheById(id, principal.getName()));
+        return ResponseEntity.ok(clothesService.getClotheById(id, Optional.ofNullable(principal)));
     }
 
 
