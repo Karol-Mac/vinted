@@ -48,10 +48,17 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize ->
                      authorize
+                             //categories:
                              .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
-                             .requestMatchers(HttpMethod.GET, "/api/clothes/**").permitAll()
-                             .requestMatchers(HttpMethod.GET, "/api/images/{imageName}").permitAll()
+                             .requestMatchers("/api/categories/**").hasRole("ADMIN")
+
+                             //auth:
                              .requestMatchers( "/api/auth/**").permitAll()
+                             //images:
+                             .requestMatchers(HttpMethod.GET, "/api/images/{imageName}").permitAll()
+
+                             //clothes:
+                             .requestMatchers(HttpMethod.GET, "/api/clothes/**").permitAll()
                              .anyRequest().authenticated()
                             )
                 .exceptionHandling(exception ->
