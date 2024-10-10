@@ -38,8 +38,8 @@ public class ClotheController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ClotheDto> getClothe(@PathVariable long id){
-        return ResponseEntity.ok(clothesService.getClotheById(id));
+    public ResponseEntity<ClotheDto> getClothe(@PathVariable long id, Principal principal){
+        return ResponseEntity.ok(clothesService.getClotheById(id, principal.getName()));
     }
 
 

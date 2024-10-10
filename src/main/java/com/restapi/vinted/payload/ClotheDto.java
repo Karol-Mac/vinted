@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Data
@@ -39,6 +40,15 @@ public class ClotheDto {
     @Size(max = 5, message = Constant.IMAGES_VALIDATION_FAILED)
     private List<String> images;
 
+    private ZonedDateTime createdAt;
+
+    private ZonedDateTime updatedAt;
+
+    private String material;
+
+    private int views;
+
     private long categoryId;
+
     private long userId;
 }

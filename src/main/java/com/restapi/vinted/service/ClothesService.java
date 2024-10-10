@@ -10,7 +10,7 @@ public interface ClothesService {
 
     ClotheResponse getAllClothesByCategory(long categoryId, int pageNo, int pageSize, String sortBy, String direction);
 
-    ClotheDto getClotheById(long clotheId);
+    ClotheDto getClotheById(long clotheId, String email);
 
     ClotheDto addClothe(ClotheDto clotheDto, List<MultipartFile> images, String email);
 

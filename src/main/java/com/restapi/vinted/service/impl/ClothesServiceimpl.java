@@ -14,6 +14,8 @@ import com.restapi.vinted.service.ClothesService;
 import com.restapi.vinted.utils.Constant;
 import org.modelmapper.ModelMapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -30,6 +32,7 @@ import java.util.List;
 @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 public class ClothesServiceimpl implements ClothesService {
 
+    private static final Logger log = LoggerFactory.getLogger(ClothesServiceimpl.class);
     private final ClotheRepository clotheRepository;
     private final ImageService imageService;
     private final ModelMapper mapper;
@@ -67,10 +70,19 @@ public class ClothesServiceimpl implements ClothesService {
     }
 
     @Override
-    public ClotheDto getClotheById(long clotheId) {
+    @Transactional
+    public ClotheDto getClotheById(long clotheId, String email) {
+
+        log.warn("Principal's name: {}", email);
 
         Clothe clothe = clotheRepository.findById(clotheId)
                 .orElseThrow( ()-> new ResourceNotFoundException("Clothe", "id", clotheId));
+
+        //increment view's count if any user (expect the owner) looks at clothing
+        if(!clothe.getUser().equals(getUser(email))){
+            clothe.setViews(clothe.getViews() + 1);
+            clotheRepository.save(clothe);
+        }
 
         return mapToDto(clothe);
     }

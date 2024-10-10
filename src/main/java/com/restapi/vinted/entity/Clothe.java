@@ -46,6 +46,10 @@ public class Clothe {
     @ElementCollection
     private List<String> images;
 
+    private String material;
+
+    private int views;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
@@ -53,5 +57,4 @@ public class Clothe {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
 }
