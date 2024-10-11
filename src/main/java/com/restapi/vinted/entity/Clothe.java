@@ -61,6 +61,6 @@ public class Clothe {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne(mappedBy = "clothe")
-    private Order order;
+    @OneToMany
+    private List<Conversation> conversations;
 }
