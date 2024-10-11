@@ -5,9 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.ZonedDateTime;
 import java.util.Set;
 
 @Data
@@ -23,6 +20,7 @@ public class Storage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    //relations:
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -33,7 +31,4 @@ public class Storage {
             inverseJoinColumns = @JoinColumn(name = "clothe_id", referencedColumnName = "id")
     )
     private Set<Clothe> clothes;
-
-    @CreationTimestamp
-    private ZonedDateTime addedAt;
 }
