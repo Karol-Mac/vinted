@@ -31,7 +31,7 @@
 //    @Transactional
 //    public void loadInitialData() {
 //        if (!dataExists()) {
-//            loadSqlScript("static/data.sql");
+//            loadSqlScript("static/data.sql.sql");
 //        }
 //    }
 //
