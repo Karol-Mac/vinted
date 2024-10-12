@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,6 +28,6 @@ public class Conversation {
     @JoinColumn(name = "clothe_id")
     private Clothe clothe;
 
-//    @OneToMany(mappedBy = "conversation")
-//    private List<Message> messages;
+    @OneToMany(mappedBy = "conversation", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<Message> messages;
 }
