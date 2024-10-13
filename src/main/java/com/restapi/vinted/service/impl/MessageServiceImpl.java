@@ -34,11 +34,14 @@ public class MessageServiceImpl implements MessageService {
     public void sendMessage(long buyiedId, long clotheId, String message, String emial) {
 
         var currentUser = userRepository.findByEmail(emial).get();
+        var clothe = clotheRepository.findById(clotheId)
+                .orElseThrow(() -> new ResourceNotFoundException("Clothe", "id", clotheId));
+
+
         var conversation = conversationRepository.findByBuyerIdAndClotheId(buyiedId, clotheId)
                 .orElseThrow( () -> new ResourceNotFoundException("Conversation", "buyierId or clotheId"));
 
         boolean isBuyier;
-        var clothe = clotheRepository.findById(clotheId).get();
 
         if(currentUser.getId() == conversation.getBuyer().getId()) {
             isBuyier = true;
@@ -52,15 +55,18 @@ public class MessageServiceImpl implements MessageService {
         saveMessage(messageDto);
     }
 
-    private void saveMessage(MessageDto messageDto) {
-        var conversation = conversationRepository
-                .findByBuyerIdAndClotheId(messageDto.getBuyierId(), messageDto.getClotheId()).get();
+    @Override
+    public void saveMessage(MessageDto messageDto) {
+        messageRepository.save(mapToEntity(messageDto));
+    }
 
-        var message = new Message();
-        message.setMessage(messageDto.getMessageContent());
-        message.setBuyer(messageDto.isBuyer());
-        message.setConversation(conversation);
-
-        messageRepository.save(message);
+    private Message mapToEntity(MessageDto messageDto) {
+        return Message.builder()
+                .message(messageDto.getMessageContent())
+                .isBuyer(messageDto.isBuyer())
+                .conversation(conversationRepository
+                        .findByBuyerIdAndClotheId(
+                                messageDto.getBuyierId(),
+                                messageDto.getClotheId()).get()).build();
     }
 }
