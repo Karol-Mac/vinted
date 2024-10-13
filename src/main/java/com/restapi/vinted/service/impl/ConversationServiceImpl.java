@@ -28,13 +28,13 @@ public class ConversationServiceImpl implements ConversationService {
         var clothe = clotheRepository.findById(clotheId)
                 .orElseThrow(() ->new ResourceNotFoundException("Clothe", "id", clotheId));
 
-        var buyier = userRepository.findByEmail(email).get();
+        var buyer = userRepository.findByEmail(email).get();
 
-        var conversaation = Conversation.builder()
-                                        .buyer(buyier)
+        var conversation = Conversation.builder()
+                                        .buyer(buyer)
                                         .clothe(clothe)
                                         .build();
 
-        conversationRepository.save(conversaation);
+        conversationRepository.save(conversation);
     }
 }

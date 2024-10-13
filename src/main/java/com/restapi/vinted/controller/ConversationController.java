@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 
 @RestController
-@RequestMapping
+@RequestMapping("/api")
 public class ConversationController {
     private final ConversationService conversationService;
 

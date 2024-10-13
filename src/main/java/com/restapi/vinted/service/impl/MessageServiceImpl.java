@@ -47,7 +47,6 @@ public class MessageServiceImpl implements MessageService {
         } else {
             throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
-
         var messageDto = new MessageDto(buyiedId, clotheId, message, isBuyier);
 
         saveMessage(messageDto);
@@ -58,7 +57,7 @@ public class MessageServiceImpl implements MessageService {
                 .findByBuyerIdAndClotheId(messageDto.getBuyierId(), messageDto.getClotheId()).get();
 
         var message = new Message();
-        message.setMessage(message.getMessage());
+        message.setMessage(messageDto.getMessageContent());
         message.setBuyer(messageDto.isBuyer());
         message.setConversation(conversation);
 
