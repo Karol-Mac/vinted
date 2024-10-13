@@ -1,0 +1,3 @@
+1. potwierdzenie rejestracji emailem
+2. aktualizowanie dodanego zdjęcia
+3. zmiana danych selera (username, password, image)
