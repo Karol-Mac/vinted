@@ -44,5 +44,5 @@ public class User {
     private Set<Clothe> myClothes;
 
     @OneToMany
-    private Set<Conversation> Conversations;
+    private Set<Conversation> conversations;
 }

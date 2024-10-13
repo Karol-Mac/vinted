@@ -21,8 +21,8 @@ public class Conversation {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "sender_id")
-    private User sender;
+    @JoinColumn(name = "buyer_id")
+    private User buyer;
 
     @ManyToOne
     @JoinColumn(name = "clothe_id")

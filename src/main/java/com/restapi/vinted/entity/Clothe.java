@@ -50,8 +50,7 @@ public class Clothe {
     private String material;
 
     private int views;
-
-
+    
     //relations:
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
