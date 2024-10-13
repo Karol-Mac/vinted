@@ -12,7 +12,7 @@ import org.hibernate.validator.constraints.Length;
 @NoArgsConstructor
 @Builder
 public class MessageDto {
-    private long buyierId;
+    private long buyerId;
 
     private long clotheId;
 

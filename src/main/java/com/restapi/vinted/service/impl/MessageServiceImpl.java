@@ -31,26 +31,26 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public void sendMessage(long buyiedId, long clotheId, String message, String emial) {
+    public void sendMessage(long buyedId, long clotheId, String message, String emial) {
 
         var currentUser = userRepository.findByEmail(emial).get();
         var clothe = clotheRepository.findById(clotheId)
                 .orElseThrow(() -> new ResourceNotFoundException("Clothe", "id", clotheId));
 
 
-        var conversation = conversationRepository.findByBuyerIdAndClotheId(buyiedId, clotheId)
+        var conversation = conversationRepository.findByBuyerIdAndClotheId(buyedId, clotheId)
                 .orElseThrow( () -> new ResourceNotFoundException("Conversation", "buyierId or clotheId"));
 
-        boolean isBuyier;
+        boolean isBuyer;
 
         if(currentUser.getId() == conversation.getBuyer().getId()) {
-            isBuyier = true;
+            isBuyer = true;
         } else if (currentUser.getId() == clothe.getUser().getId()) {
-            isBuyier = false;
+            isBuyer = false;
         } else {
             throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
-        var messageDto = new MessageDto(buyiedId, clotheId, message, isBuyier);
+        var messageDto = new MessageDto(buyedId, clotheId, message, isBuyer);
 
         saveMessage(messageDto);
     }
@@ -66,7 +66,7 @@ public class MessageServiceImpl implements MessageService {
                 .isBuyer(messageDto.isBuyer())
                 .conversation(conversationRepository
                         .findByBuyerIdAndClotheId(
-                                messageDto.getBuyierId(),
+                                messageDto.getBuyerId(),
                                 messageDto.getClotheId()).get()).build();
     }
 }
