@@ -1,7 +1,9 @@
 package com.restapi.vinted.service.impl;
+import com.restapi.vinted.entity.Clothe;
 import com.restapi.vinted.exception.ApiException;
 import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.service.ImageService;
+import com.restapi.vinted.utils.Constant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -45,6 +48,21 @@ public class ImageServiceImpl implements ImageService {
         }
 
         return imageName;
+    }
+
+    public void updateImages(Clothe clothe, List<MultipartFile> newImages, List<String> deletedImages) {
+        if (deletedImages != null && !deletedImages.isEmpty()) {
+            clothe.getImages().removeAll(deletedImages);
+            deletedImages.forEach(this::deleteImage);
+        }
+
+        if(clothe.getImages().size() + newImages.size() > 5)
+            throw new ApiException(HttpStatus.BAD_REQUEST, Constant.IMAGES_VALIDATION_FAILED);
+
+        if (newImages != null && !newImages.isEmpty()) {
+            var newImageNames = newImages.stream().map(this::saveImage).toList();
+            clothe.getImages().addAll(newImageNames);
+        }
     }
 
     @Override
