@@ -8,6 +8,4 @@ import java.util.Optional;
 public interface ConversationRepository extends JpaRepository<Conversation, Long> {
 
     Optional<Conversation> findByBuyerIdAndClotheId(Long buyerId, Long clotheId);
-
-
 }
