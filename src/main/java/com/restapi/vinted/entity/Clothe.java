@@ -60,6 +60,6 @@ public class Clothe {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany
+    @OneToMany(mappedBy = "clothe", cascade = CascadeType.ALL)
     private List<Conversation> conversations;
 }

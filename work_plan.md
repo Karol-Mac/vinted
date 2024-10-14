@@ -5,8 +5,8 @@
  -[ ] dodatkowe funkcje:
    -[x] dodanie licznika ubrań w kategorii i licznika wyświetleń w ubraniu
    - [ ] konwersacje między użytkownikami
-       -[x] podepnij serwer RabbitMQ
-       -[ ] utwórz encję konwersacji i wiadomości
+       -[x] utwórz encję konwersacji i wiadomości
+       - [ ] zaimplementuj logikę
 
   -[ ] dodanie zamówień
     -[ ] dodaj encję Order i Cart.

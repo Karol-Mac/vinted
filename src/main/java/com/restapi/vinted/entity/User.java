@@ -43,6 +43,6 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Clothe> myClothes;
 
-    @OneToMany
+    @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL)
     private Set<Conversation> conversations;
 }
