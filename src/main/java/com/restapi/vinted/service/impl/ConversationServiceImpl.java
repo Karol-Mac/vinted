@@ -1,15 +1,12 @@
 package com.restapi.vinted.service.impl;
 
 import com.restapi.vinted.entity.Conversation;
-import com.restapi.vinted.entity.Message;
-import com.restapi.vinted.entity.User;
-import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.payload.ConversationDto;
 import com.restapi.vinted.payload.MessageDto;
-import com.restapi.vinted.repository.ClotheRepository;
 import com.restapi.vinted.repository.ConversationRepository;
-import com.restapi.vinted.repository.UserRepository;
 import com.restapi.vinted.service.ConversationService;
+import com.restapi.vinted.utils.ClotheUtils;
+import com.restapi.vinted.utils.MessagingUtils;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -21,24 +18,23 @@ import java.util.List;
 @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 public class ConversationServiceImpl implements ConversationService {
 
-    private final ClotheRepository clotheRepository;
     private final ConversationRepository conversationRepository;
-    private final UserRepository userRepository;
+    private final ClotheUtils clotheUtils;
+    private final MessagingUtils messagingUtils;
 
-    public ConversationServiceImpl(ClotheRepository clotheRepository, ConversationRepository conversationRepository,
-                                   UserRepository userRepository){
-        this.clotheRepository = clotheRepository;
+    public ConversationServiceImpl(ConversationRepository conversationRepository,
+                                   ClotheUtils clotheUtils, MessagingUtils messagingUtils){
         this.conversationRepository = conversationRepository;
-        this.userRepository = userRepository;
+        this.clotheUtils = clotheUtils;
+        this.messagingUtils = messagingUtils;
     }
 
     @Override
     @Transactional
     public void startConversation(long clotheId, String email){
-        var clothe = clotheRepository.findById(clotheId)
-                .orElseThrow(() -> new ResourceNotFoundException("Clothe", "id", clotheId));
+        var clothe = clotheUtils.getClotheFromDB(clotheId);
 
-        var buyer = getUser(email);
+        var buyer = messagingUtils.getUser(email);
         var conversation = Conversation.builder()
                 .buyer(buyer)
                 .clothe(clothe)
@@ -50,10 +46,10 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public List<ConversationDto> getConversationsBuying(String email){
 
-        var user = getUser(email);
-        return conversationRepository.findByBuyerId(user.getId())
+        var buyer = messagingUtils.getUser(email);
+        return conversationRepository.findByBuyerId(buyer.getId())
                 .stream()
-                .map(this::mapToDto)
+                .map(messagingUtils::mapToDto)
                 .toList();
     }
 
@@ -62,47 +58,17 @@ public class ConversationServiceImpl implements ConversationService {
     public List<ConversationDto> getConversationsSelling(long clotheId, String email){
         return conversationRepository.findByClotheId(clotheId)
                 .stream()
-                .map(this::mapToDto)
+                .map(messagingUtils::mapToDto)
                 .toList();
     }
 
     @Override
     public List<MessageDto> getMessages(long buyerId, long clotheId, String email){
-        var user = getUser(email);
-        var buyer = userRepository.findById(buyerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Is it from here ?", "id", buyerId));
-        var clothe = clotheRepository.findById(clotheId)
-                .orElseThrow(() -> new ResourceNotFoundException("Clothe", "id", clotheId));
-        var owner = userRepository.findById(clothe.getUser().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Owner", "id", clothe.getUser().getId()));
-
-        if (!owner.equals(user) && !owner.equals(buyer))
+        if (!clotheUtils.isOwner(clotheId, email) && !messagingUtils.isBuyer(buyerId, clotheId, email))
             throw new AccessDeniedException("You don't have permission to see this message");
 
-        var conversation = conversationRepository.findByBuyerIdAndClotheId(buyerId, clotheId)
-                .orElseThrow(() -> new ResourceNotFoundException("Conversation", "buyierId or clotheId"));
+        var conversation = messagingUtils.getConversation(buyerId, clotheId);
 
-        return conversation.getMessages().stream().map(this::mapToDto).toList();
-    }
-
-    private User getUser(String email){
-        return userRepository.findByEmail(email).get();
-    }
-
-    private ConversationDto mapToDto(Conversation conversation){
-        return ConversationDto.builder()
-                .buyerId(conversation.getBuyer().getId())
-                .clotheId(conversation.getClothe().getId())
-                .id(conversation.getId())
-                .build();
-    }
-
-    private MessageDto mapToDto(Message message){
-        return MessageDto.builder()
-                .isBuyer(message.isBuyer())
-                .clotheId(message.getConversation().getClothe().getId())
-                .buyerId(message.getConversation().getBuyer().getId())
-                .messageContent(message.getMessage())
-                .build();
+        return conversation.getMessages().stream().map(messagingUtils::mapToDto).toList();
     }
 }

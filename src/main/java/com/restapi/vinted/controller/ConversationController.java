@@ -41,6 +41,4 @@ public class ConversationController {
     public ResponseEntity<List<MessageDto>> getMessages(@RequestParam long buyerId, @RequestParam long clotheId, Principal principal) {
         return ResponseEntity.ok(conversationService.getMessages(buyerId, clotheId, principal.getName()));
     }
-
-    //TODO: add endpoint to delete conversation's
 }
