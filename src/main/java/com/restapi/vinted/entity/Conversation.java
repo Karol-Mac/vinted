@@ -30,4 +30,5 @@ public class Conversation {
 
     @OneToMany(mappedBy = "conversation", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Message> messages;
+
 }

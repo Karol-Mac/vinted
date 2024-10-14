@@ -42,16 +42,13 @@ public class MessageServiceImpl implements MessageService {
                 .orElseThrow( () -> new ResourceNotFoundException("Conversation", "buyierId or clotheId"));
 
         boolean isBuyer;
+        if(currentUser.getId() == conversation.getBuyer().getId())  isBuyer = true;
 
-        if(currentUser.getId() == conversation.getBuyer().getId()) {
-            isBuyer = true;
-        } else if (currentUser.getId() == clothe.getUser().getId()) {
-            isBuyer = false;
-        } else {
-            throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
-        }
+        else if (currentUser.getId() == clothe.getUser().getId())   isBuyer = false;
+
+        else throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+
         var messageDto = new MessageDto(buyedId, clotheId, message, isBuyer);
-
         saveMessage(messageDto);
     }
 
@@ -63,7 +60,7 @@ public class MessageServiceImpl implements MessageService {
     private Message mapToEntity(MessageDto messageDto) {
         return Message.builder()
                 .message(messageDto.getMessageContent())
-                .isBuyer(messageDto.isBuyer())
+                .isBuyer(messageDto.getIsBuyer())
                 .conversation(conversationRepository
                         .findByBuyerIdAndClotheId(
                                 messageDto.getBuyerId(),
