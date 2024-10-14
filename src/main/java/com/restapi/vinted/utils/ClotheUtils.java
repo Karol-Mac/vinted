@@ -1,6 +1,8 @@
 package com.restapi.vinted.utils;
 
+import com.restapi.vinted.entity.Category;
 import com.restapi.vinted.entity.Clothe;
+import com.restapi.vinted.entity.Conversation;
 import com.restapi.vinted.entity.User;
 import com.restapi.vinted.exception.ApiException;
 import com.restapi.vinted.exception.ResourceNotFoundException;
@@ -8,23 +10,22 @@ import com.restapi.vinted.payload.ClotheDto;
 import com.restapi.vinted.payload.ClotheResponse;
 import com.restapi.vinted.repository.ClotheRepository;
 import com.restapi.vinted.repository.UserRepository;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 
 @Component
 public class ClotheUtils {
 
     private final ClotheRepository clotheRepository;
     private final UserRepository userRepository;
-    private final ModelMapper mapper;
 
-    public ClotheUtils(ClotheRepository clotheRepository, UserRepository userRepository, ModelMapper mapper) {
+    public ClotheUtils(ClotheRepository clotheRepository, UserRepository userRepository) {
         this.clotheRepository = clotheRepository;
         this.userRepository = userRepository;
-        this.mapper = mapper;
     }
 
 
@@ -60,13 +61,37 @@ public class ClotheUtils {
     }
 
     public Clothe mapToEntity(ClotheDto clotheDto){
-        // TODO: dla categryId tworzy pusty obiekt Category tylko z polem Id (reszta null)
-        // NIE POBIERA NICZEGO Z BAZY
-        // to wystarczy do zapisania clothe w bazie
-        return mapper.map(clotheDto, Clothe.class);
+        return Clothe.builder()
+                .name(clotheDto.getName())
+                .description(clotheDto.getDescription())
+                .price(clotheDto.getPrice())
+                .size(clotheDto.getSize())
+                .material(clotheDto.getMaterial())
+                .images(clotheDto.getImages())
+                .views(clotheDto.getViews())
+                .category(new Category(clotheDto.getCategoryId()))
+                .build();
     }
 
     public ClotheDto mapToDto(Clothe clothe){
-        return mapper.map(clothe, ClotheDto.class);
+        var conversations = clothe.getConversations() != null ?
+                        clothe.getConversations().stream().map(Conversation::getId).toList() :
+                        new ArrayList<Long>();
+
+        return ClotheDto.builder()
+                .id(clothe.getId())
+                .name(clothe.getName())
+                .description(clothe.getDescription())
+                .price(clothe.getPrice())
+                .size(clothe.getSize())
+                .material(clothe.getMaterial())
+                .images(clothe.getImages())
+                .views(clothe.getViews())
+                .createdAt(clothe.getCreatedAt())
+                .updatedAt(clothe.getUpdatedAt())
+                .userId(clothe.getUser().getId())
+                .categoryId(clothe.getCategory().getId())
+                .conversasations(conversations)
+                .build();
     }
 }

@@ -51,4 +51,6 @@ public class ClotheDto {
     private long categoryId;
 
     private long userId;
+
+    private List<Long> conversasations;
 }

@@ -36,4 +36,8 @@ public class Category {
 
     @UpdateTimestamp
     private ZonedDateTime updatedAt;
+
+    public Category(long categoryId){
+        this.id = categoryId;
+    }
 }
