@@ -1,7 +1,7 @@
 package com.restapi.vinted.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.restapi.vinted.payload.ErrorDetails;
+import com.restapi.vinted.exception.ErrorDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;

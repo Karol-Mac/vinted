@@ -1,6 +1,5 @@
 package com.restapi.vinted.exception;
 
-import com.restapi.vinted.payload.ErrorDetails;
 import com.restapi.vinted.utils.Constant;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
