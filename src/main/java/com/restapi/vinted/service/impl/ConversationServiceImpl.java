@@ -7,6 +7,7 @@ import com.restapi.vinted.repository.ConversationRepository;
 import com.restapi.vinted.service.ConversationService;
 import com.restapi.vinted.utils.ClotheUtils;
 import com.restapi.vinted.utils.MessagingUtils;
+import com.restapi.vinted.utils.UserUtils;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -21,12 +22,14 @@ public class ConversationServiceImpl implements ConversationService {
     private final ConversationRepository conversationRepository;
     private final ClotheUtils clotheUtils;
     private final MessagingUtils messagingUtils;
+    private final UserUtils userUtils;
 
     public ConversationServiceImpl(ConversationRepository conversationRepository,
-                                   ClotheUtils clotheUtils, MessagingUtils messagingUtils){
+                                   ClotheUtils clotheUtils, MessagingUtils messagingUtils, UserUtils userUtils){
         this.conversationRepository = conversationRepository;
         this.clotheUtils = clotheUtils;
         this.messagingUtils = messagingUtils;
+        this.userUtils = userUtils;
     }
 
     @Override
@@ -34,7 +37,7 @@ public class ConversationServiceImpl implements ConversationService {
     public void startConversation(long clotheId, String email){
         var clothe = clotheUtils.getClotheFromDB(clotheId);
 
-        var buyer = messagingUtils.getUser(email);
+        var buyer = userUtils.getUser(email);
         var conversation = Conversation.builder()
                 .buyer(buyer)
                 .clothe(clothe)
@@ -46,7 +49,7 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public List<ConversationDto> getConversationsBuying(String email){
 
-        var buyer = messagingUtils.getUser(email);
+        var buyer = userUtils.getUser(email);
         return conversationRepository.findByBuyerId(buyer.getId())
                 .stream()
                 .map(messagingUtils::mapToDto)

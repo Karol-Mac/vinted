@@ -2,23 +2,21 @@ package com.restapi.vinted.utils;
 
 import com.restapi.vinted.entity.Conversation;
 import com.restapi.vinted.entity.Message;
-import com.restapi.vinted.entity.User;
 import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.payload.ConversationDto;
 import com.restapi.vinted.payload.MessageDto;
 import com.restapi.vinted.repository.ConversationRepository;
-import com.restapi.vinted.repository.UserRepository;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MessagingUtils {
 
     private final ConversationRepository conversationRepository;
-    private final UserRepository userRepository;
+    private final UserUtils userUtils;
 
-    public MessagingUtils(ConversationRepository conversationRepository, UserRepository userRepository){
+    public MessagingUtils(ConversationRepository conversationRepository, UserUtils userUtils){
         this.conversationRepository = conversationRepository;
-        this.userRepository = userRepository;
+        this.userUtils = userUtils;
     }
 
     public Conversation getConversation(long buyedId, long clotheId){
@@ -28,14 +26,9 @@ public class MessagingUtils {
 
     public boolean isBuyer(long buyerId, long clotheId, String email) {
         var conversation = getConversation(buyerId, clotheId);
-        var currentUser = getUser(email);
+        var currentUser = userUtils.getUser(email);
 
         return conversation.getBuyer().equals(currentUser);
-    }
-
-    public User getUser(String email){
-        return userRepository.findByEmail(email).orElseThrow(
-                () -> new ResourceNotFoundException("User", "email", email));
     }
 
     public Message mapToEntity(MessageDto messageDto) {

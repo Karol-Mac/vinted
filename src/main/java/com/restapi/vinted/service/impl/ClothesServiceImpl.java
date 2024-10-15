@@ -7,13 +7,11 @@ import com.restapi.vinted.payload.ClotheDto;
 import com.restapi.vinted.payload.ClotheResponse;
 import com.restapi.vinted.repository.CategoryRepository;
 import com.restapi.vinted.repository.ClotheRepository;
-import com.restapi.vinted.repository.UserRepository;
 import com.restapi.vinted.service.ImageService;
 import com.restapi.vinted.service.ClothesService;
 import com.restapi.vinted.utils.ClotheUtils;
+import com.restapi.vinted.utils.UserUtils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -31,21 +29,20 @@ import java.util.Optional;
 @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 public class ClothesServiceImpl implements ClothesService {
 
-    private static final Logger log = LoggerFactory.getLogger(ClothesServiceImpl.class);
     private final ClotheRepository clotheRepository;
     private final ImageService imageService;
-    private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final ClotheUtils clotheUtils;
+    private final UserUtils userUtils;
 
 
     public ClothesServiceImpl(ClotheRepository clotheRepository, ImageService imageService,
-                              UserRepository userRepository, CategoryRepository categoryRepository, ClotheUtils clotheUtils) {
+                              CategoryRepository categoryRepository, ClotheUtils clotheUtils, UserUtils userUtils) {
         this.clotheRepository = clotheRepository;
         this.imageService = imageService;
-        this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.clotheUtils = clotheUtils;
+        this.userUtils = userUtils;
     }
 
 
@@ -80,7 +77,7 @@ public class ClothesServiceImpl implements ClothesService {
         //update of view's field:
         if(principal.isEmpty() || (
                     principal.isPresent() &&
-                    !clothe.getUser().equals(getUser(principal.get().getName())))) {
+                    !clothe.getUser().equals(userUtils.getUser(principal.get().getName())))) {
             clothe.setViews(clothe.getViews() + 1);
             clotheRepository.save(clothe);
         }
@@ -92,19 +89,15 @@ public class ClothesServiceImpl implements ClothesService {
     @Override
     @Transactional
     public ClotheDto addClothe(ClotheDto clotheDto, List<MultipartFile> images, String email) {
-        User user = getUser(email);
+        User user = userUtils.getUser(email);
 
         Clothe clothe = clotheUtils.mapToEntity(clotheDto);
         clothe.setUser(user);
-
-        log.warn("Clothe Category: {}", clothe.getCategory());
 
         var imageNames = images.stream().map(imageService::saveImage).toList();
         clothe.setImages(imageNames);
 
         Clothe savedClothe = clotheRepository.save(clothe);
-
-        log.warn("Clothe Category: {}", savedClothe.getCategory());
 
         return clotheUtils.mapToDto(savedClothe);
     }
@@ -115,7 +108,7 @@ public class ClothesServiceImpl implements ClothesService {
     public ClotheResponse getMyClothes(int pageNo, int pageSize, String sortBy,
                                        String direction, String email) {
         //getting logged-in user
-        User user = getUser(email);
+        User user = userUtils.getUser(email);
 
         //define the direction of sorting, and by what to sort by
         Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name()) ?
@@ -165,10 +158,5 @@ public class ClothesServiceImpl implements ClothesService {
 
         clotheRepository.delete(clothe);
         return "Clothe deleted successfully!";
-    }
-
-    private User getUser(String email){
-        return userRepository.findByEmail(email).orElseThrow(
-                () -> new ResourceNotFoundException("User", "email", email));
     }
 }

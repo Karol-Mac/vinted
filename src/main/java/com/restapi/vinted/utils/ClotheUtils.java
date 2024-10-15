@@ -3,13 +3,11 @@ package com.restapi.vinted.utils;
 import com.restapi.vinted.entity.Category;
 import com.restapi.vinted.entity.Clothe;
 import com.restapi.vinted.entity.Conversation;
-import com.restapi.vinted.entity.User;
 import com.restapi.vinted.exception.ApiException;
 import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.payload.ClotheDto;
 import com.restapi.vinted.payload.ClotheResponse;
 import com.restapi.vinted.repository.ClotheRepository;
-import com.restapi.vinted.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -21,18 +19,18 @@ import java.util.ArrayList;
 public class ClotheUtils {
 
     private final ClotheRepository clotheRepository;
-    private final UserRepository userRepository;
+    private final UserUtils userUtils;
 
-    public ClotheUtils(ClotheRepository clotheRepository, UserRepository userRepository) {
+    public ClotheUtils(ClotheRepository clotheRepository, UserUtils userUtils) {
         this.clotheRepository = clotheRepository;
-        this.userRepository = userRepository;
+        this.userUtils = userUtils;
     }
 
 
     @Transactional(readOnly = true)
     public boolean isOwner(long clotheId, String email){
         var clothe = getClotheFromDB(clotheId);
-        var user = getUser(email);
+        var user = userUtils.getUser(email);
         if (!clothe.getUser().equals(user))
             throw new ApiException(HttpStatus.FORBIDDEN, Constant.NOT_OWNER);
         return true;
@@ -42,11 +40,6 @@ public class ClotheUtils {
         return clotheRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Clothe", "id", id)
         );
-    }
-
-    public User getUser(String email){
-        return userRepository.findByEmail(email).orElseThrow(
-                () -> new ResourceNotFoundException("User", "email", email));
     }
 
     public ClotheResponse getClotheResponse(int pageNo, int pageSize, Page<Clothe> clothes){
