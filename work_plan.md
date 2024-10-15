@@ -4,9 +4,9 @@
 
  -[ ] dodatkowe funkcje:
    -[x] dodanie licznika ubrań w kategorii i licznika wyświetleń w ubraniu
-   - [ ] konwersacje między użytkownikami
+   - [x] konwersacje między użytkownikami
        -[x] utwórz encję konwersacji i wiadomości
-       - [ ] zaimplementuj logikę
+       - [x] zaimplementuj logikę (brak usuówania - nie widzę sensu tej funkcji)
 
   -[ ] dodanie zamówień
     -[ ] dodaj encję Order i Cart.
