@@ -30,7 +30,7 @@ CREATE TABLE `categories` (
   `updated_at` datetime(6) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UK_t8o6pivur7nn124jehx7cygw5` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -72,29 +72,45 @@ CREATE TABLE `clothes` (
   KEY `FK9v7gut79d5gafwodlxbpv5y2x` (`user_id`),
   CONSTRAINT `FK9v7gut79d5gafwodlxbpv5y2x` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   CONSTRAINT `FKq09ihrldgf70biy36vgqwehtw` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `orders`
+-- Table structure for table `conversations`
 --
 
-DROP TABLE IF EXISTS `orders`;
+DROP TABLE IF EXISTS `conversations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `orders` (
+CREATE TABLE `conversations` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `buyer_id` bigint DEFAULT NULL,
+  `clothe_id` bigint DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK11fycx5lvegp8mwplgsl8401h` (`buyer_id`),
+  KEY `FK6n4o327kbypheegjb8fwk99lw` (`clothe_id`),
+  CONSTRAINT `FK11fycx5lvegp8mwplgsl8401h` FOREIGN KEY (`buyer_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FK6n4o327kbypheegjb8fwk99lw` FOREIGN KEY (`clothe_id`) REFERENCES `clothes` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `messages`
+--
+
+DROP TABLE IF EXISTS `messages`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `messages` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `created_at` datetime(6) DEFAULT NULL,
-  `total_price` decimal(38,2) NOT NULL,
-  `updated_at` datetime(6) DEFAULT NULL,
-  `user_id` bigint NOT NULL,
-  `clothe_id` bigint NOT NULL,
+  `is_buyer` bit(1) NOT NULL,
+  `message` varchar(500) NOT NULL,
+  `conversation_id` bigint DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `UK_dlmlkesdf37lq3w9u6a2u79wg` (`clothe_id`),
-  KEY `FK32ql8ubntj5uh44ph9659tiih` (`user_id`),
-  CONSTRAINT `FK32ql8ubntj5uh44ph9659tiih` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  CONSTRAINT `FKmgujxvmo383xlyx947dx2cpso` FOREIGN KEY (`clothe_id`) REFERENCES `clothes` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `FKt492th6wsovh1nush5yl5jj8e` (`conversation_id`),
+  CONSTRAINT `FKt492th6wsovh1nush5yl5jj8e` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -108,40 +124,7 @@ CREATE TABLE `roles` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `storage`
---
-
-DROP TABLE IF EXISTS `storage`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `storage` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `user_id` bigint NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `UK_1i4jiuo3n7io1cc4ilu2s38mc` (`user_id`),
-  CONSTRAINT `FK3sedaenipukllqrhkuldl4ku0` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `storages_clothes`
---
-
-DROP TABLE IF EXISTS `storages_clothes`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `storages_clothes` (
-  `storage_id` bigint NOT NULL,
-  `clothe_id` bigint NOT NULL,
-  PRIMARY KEY (`storage_id`,`clothe_id`),
-  KEY `FKgcj2tbr83hff1iuhwqo7onhf4` (`clothe_id`),
-  CONSTRAINT `FKgcj2tbr83hff1iuhwqo7onhf4` FOREIGN KEY (`clothe_id`) REFERENCES `clothes` (`id`),
-  CONSTRAINT `FKnpsqe4qmwl6l4vkv065vyvjl1` FOREIGN KEY (`storage_id`) REFERENCES `storage` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -160,7 +143,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `UK_6dotkott2kjsp8vw4d0m25fb7` (`email`),
   UNIQUE KEY `UK_r43af9ap4edm43mmtq01oddj6` (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -189,4 +172,4 @@ CREATE TABLE `users_roles` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-11 12:38:58
+-- Dump completed on 2024-10-17  6:40:43
