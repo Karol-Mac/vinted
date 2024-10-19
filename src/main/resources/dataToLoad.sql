@@ -42,3 +42,10 @@ INSERT INTO clothes (name, description, price, size, created_at, updated_at, mat
             VALUES ('Blouse', 'White elegant blouse', 39.99, 'L', DATE(NOW()), DATE(NOW()), 'Cotton', 8, 5, 2, false);
 INSERT INTO clothes (name, description, price, size, created_at, updated_at, material, views, category_id, user_id, is_available)
             VALUES ('White T-Shirt', 'Comfortable cotton t-shirt', 24.99, 'M', DATE(NOW()), DATE(NOW()), 'Cotton', 10, 1, 2, true);
+
+insert into conversations (buyer_id, clothe_id) values (3, 1);
+
+INSERT INTO messages (message, is_buyer, created_at, conversation_id)
+            VALUES ('Hello, I would like to buy this T-Shirt, but half the price', true, DATE(NOW()), 1);
+INSERT INTO messages (message, is_buyer, created_at, conversation_id)
+            VALUES ('No, I won\'t sold it for 10$', false, DATE(NOW()), 1);
