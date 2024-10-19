@@ -77,6 +77,8 @@ public class ClotheController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteClothe(@PathVariable long id, Principal principal){
-        return ResponseEntity.ok(clothesService.deleteClothe(id, principal.getName()));
+        clothesService.deleteClothe(id, principal.getName());
+
+        return ResponseEntity.noContent().build();
     }
 }

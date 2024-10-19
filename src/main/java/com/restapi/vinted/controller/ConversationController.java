@@ -33,7 +33,7 @@ public class ConversationController {
     }
 
     @GetMapping("/conversations/selling")
-    public ResponseEntity<List<ConversationDto>> getConversations(@RequestParam long clotheId, Principal principal) {
+    public ResponseEntity<List<ConversationDto>> getConversationsSelling(@RequestParam long clotheId, Principal principal) {
         return ResponseEntity.ok(conversationService.getConversationsSelling(clotheId, principal.getName()));
     }
 
@@ -41,4 +41,6 @@ public class ConversationController {
     public ResponseEntity<List<MessageDto>> getMessages(@RequestParam long buyerId, @RequestParam long clotheId, Principal principal) {
         return ResponseEntity.ok(conversationService.getMessages(buyerId, clotheId, principal.getName()));
     }
+
+    //TODO: przenieś metodę dodawania ubrań do konwersacji
 }
