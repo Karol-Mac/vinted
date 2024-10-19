@@ -38,6 +38,10 @@ public class ConversationServiceImpl implements ConversationService {
         var clothe = clotheUtils.getClotheFromDB(clotheId);
 
         var buyer = userUtils.getUser(email);
+
+        if(clothe.getUser().getId() == buyer.getId())
+            throw new AccessDeniedException("We dont't talk to ourselves");
+
         var conversation = Conversation.builder()
                 .buyer(buyer)
                 .clothe(clothe)

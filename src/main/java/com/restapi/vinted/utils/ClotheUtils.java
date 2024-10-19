@@ -61,12 +61,13 @@ public class ClotheUtils {
                 .size(clotheDto.getSize())
                 .material(clotheDto.getMaterial())
                 .images(clotheDto.getImages())
+                .isAvailable(clotheDto.isAvailable())
                 .views(clotheDto.getViews())
                 .category(new Category(clotheDto.getCategoryId()))
                 .build();
     }
 
-    public ClotheDto mapToDto(Clothe clothe){
+    public ClotheDto mapToDto(Clothe clothe) {
         var conversations = clothe.getConversations() != null ?
                         clothe.getConversations().stream().map(Conversation::getId).toList() :
                         new ArrayList<Long>();
@@ -80,6 +81,7 @@ public class ClotheUtils {
                 .material(clothe.getMaterial())
                 .images(clothe.getImages())
                 .views(clothe.getViews())
+                .isAvailable(clothe.isAvailable())
                 .createdAt(clothe.getCreatedAt())
                 .updatedAt(clothe.getUpdatedAt())
                 .userId(clothe.getUser().getId())

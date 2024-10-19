@@ -46,6 +46,8 @@ public class ClotheDto {
 
     private String material;
 
+    private boolean isAvailable;
+
     private int views;
 
     private long categoryId;

@@ -1,26 +1,13 @@
-version: '3.8'
 
 services:
   mysqldb:
     container_name: mysqldb
     image: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: rootP\$w4
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: vinted
     ports:
       - "3306:3306"
-    networks:
-      - app-network
-
-  app:
-    container_name: app
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mysqldb
     networks:
       - app-network
 

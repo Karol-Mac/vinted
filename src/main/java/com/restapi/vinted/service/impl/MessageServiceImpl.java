@@ -23,6 +23,11 @@ public class MessageServiceImpl implements MessageService {
         this.messageUtils = messageUtils;
     }
 
+    //FIXME: tak na prawdę wysyłanie wiadomości powinno być w serwisie ConversationService
+    // bo to jest związane z konkretną konwersacją!
+
+    //TODO: zmień logikę, żeby wymagało tylko ID konwersacji, przenieś to do ConversationService
+    //  + pamiętaj o kontrolerach
     @Override
     @Transactional
     public void sendMessage(long buyedId, long clotheId, String message, String email) {
