@@ -38,6 +38,8 @@ public class Clothe {
     @Column(nullable = false)
     private ClotheSize size;
 
+    private boolean isAvailable = true;
+
     @CreationTimestamp
     private ZonedDateTime createdAt;
 

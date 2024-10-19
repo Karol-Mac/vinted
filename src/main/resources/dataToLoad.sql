@@ -4,15 +4,14 @@ insert into roles (name) values ('ROLE_ADMIN');
 insert into roles (name) values ('ROLE_USER');
 
 -- creating users
-
 insert into vinted.users (email, name, password, username) values ('admin@email.com', 'admin',
-                                                                   '$2a$10$Kcv0RMReIoG7unGNEdqbaO/oCvDkRHJ6.gjQ47bY6on98Ysvpy/7i', 'adminUsername');
+                                                                   '$2a$10$Kcv0RMReIoG7unGNEdqbaO/oCvDkRHJ6.gjQ47bY6on98Ysvpy/7i', 'admin');
 
 insert into vinted.users (email, name, password, username) values ('user1@email.com', 'user1',
-                                                                   '$2a$10$BO38kLt14mkRORfJOf0SRO4XOfsegJIJFLXze50hLqhrlbMXIeJem', 'username1');
+                                                                   '$2a$10$BO38kLt14mkRORfJOf0SRO4XOfsegJIJFLXze50hLqhrlbMXIeJem', 'user1');
 
 insert into vinted.users (email, name, password, username) values ('user2@email.com', 'user2',
-                                                                   '$2a$10$47m4oq68rn2phtIzCSIaEuIEA1ONGWEzcR590cRi2lXwwCqmpO0tm', 'username2');
+                                                                   '$2a$10$47m4oq68rn2phtIzCSIaEuIEA1ONGWEzcR590cRi2lXwwCqmpO0tm', 'user2');
 -- give users specific roles
 insert into vinted.users_roles (user_id, role_id) values (1, 1);
 insert into vinted.users_roles (user_id,role_id) values (2, 2);
@@ -31,15 +30,15 @@ VALUES ('Blouses', 'Category for stylish Blouses', DATE(NOW()), DATE(NOW()));
 
 
 
-INSERT INTO clothes (name, description, price, size, created_at, updated_at, material, views, category_id, user_id)
-            VALUES ('T-Shirt', 'Comfortable cotton t-shirt', 19.99, 'M', DATE(NOW()), DATE(NOW()), 'Cotton', 10, 1, 2);
-INSERT INTO clothes (name, description, price, size, created_at, updated_at, material, views, category_id, user_id)
-            VALUES ('Jeans', 'Stylish blue jeans', 49.99, 'L', DATE(NOW()), DATE(NOW()), 'Denim', 20, 2, 3);
-INSERT INTO clothes (name, description, price, size, created_at, updated_at, material, views, category_id, user_id)
-            VALUES ('Dress', 'Elegant black dress', 79.99, 'S', DATE(NOW()), DATE(NOW()), 'Silk', 15, 3, 2);
-INSERT INTO clothes (name, description, price, size, created_at, updated_at, material, views, category_id, user_id)
-            VALUES ('Skirt', 'Green summer skirt', 29.99, 'M', DATE(NOW()), DATE(NOW()), 'Linen', 5, 4, 3);
-INSERT INTO clothes (name, description, price, size, created_at, updated_at, material, views, category_id, user_id)
-            VALUES ('Blouse', 'White elegant blouse', 39.99, 'L', DATE(NOW()), DATE(NOW()), 'Cotton', 8, 5, 2);
-INSERT INTO clothes (name, description, price, size, created_at, updated_at, material, views, category_id, user_id)
-            VALUES ('White T-Shirt', 'Comfortable cotton t-shirt', 24.99, 'M', DATE(NOW()), DATE(NOW()), 'Cotton', 10, 1, 2);
+INSERT INTO clothes (name, description, price, size, created_at, updated_at, material, views, category_id, user_id, is_available)
+            VALUES ('T-Shirt', 'Comfortable cotton t-shirt', 19.99, 'M', DATE(NOW()), DATE(NOW()), 'Cotton', 10, 1, 2, true);
+INSERT INTO clothes (name, description, price, size, created_at, updated_at, material, views, category_id, user_id, is_available)
+            VALUES ('Jeans', 'Stylish blue jeans', 49.99, 'L', DATE(NOW()), DATE(NOW()), 'Denim', 20, 2, 3, true);
+INSERT INTO clothes (name, description, price, size, created_at, updated_at, material, views, category_id, user_id, is_available)
+            VALUES ('Dress', 'Elegant black dress', 79.99, 'S', DATE(NOW()), DATE(NOW()), 'Silk', 15, 3, 2, true);
+INSERT INTO clothes (name, description, price, size, created_at, updated_at, material, views, category_id, user_id, is_available)
+            VALUES ('Skirt', 'Green summer skirt', 29.99, 'M', DATE(NOW()), DATE(NOW()), 'Linen', 5, 4, 3, true);
+INSERT INTO clothes (name, description, price, size, created_at, updated_at, material, views, category_id, user_id, is_available)
+            VALUES ('Blouse', 'White elegant blouse', 39.99, 'L', DATE(NOW()), DATE(NOW()), 'Cotton', 8, 5, 2, false);
+INSERT INTO clothes (name, description, price, size, created_at, updated_at, material, views, category_id, user_id, is_available)
+            VALUES ('White T-Shirt', 'Comfortable cotton t-shirt', 24.99, 'M', DATE(NOW()), DATE(NOW()), 'Cotton', 10, 1, 2, true);
