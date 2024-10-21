@@ -1,13 +1,17 @@
 package com.restapi.vinted.service.impl;
 
 import com.restapi.vinted.entity.Conversation;
+import com.restapi.vinted.entity.Message;
+import com.restapi.vinted.exception.ApiException;
 import com.restapi.vinted.payload.ConversationDto;
 import com.restapi.vinted.payload.MessageDto;
 import com.restapi.vinted.repository.ConversationRepository;
-import com.restapi.vinted.service.ConversationService;
+import com.restapi.vinted.repository.MessageRepository;
+import com.restapi.vinted.service.MessagingService;
 import com.restapi.vinted.utils.ClotheUtils;
 import com.restapi.vinted.utils.MessagingUtils;
 import com.restapi.vinted.utils.UserUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -17,19 +21,21 @@ import java.util.List;
 
 @Service
 @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-public class ConversationServiceImpl implements ConversationService {
+public class MessagingServiceImpl implements MessagingService {
 
     private final ConversationRepository conversationRepository;
     private final ClotheUtils clotheUtils;
     private final MessagingUtils messagingUtils;
     private final UserUtils userUtils;
+    private final MessageRepository messageRepository;
 
-    public ConversationServiceImpl(ConversationRepository conversationRepository,
-                                   ClotheUtils clotheUtils, MessagingUtils messagingUtils, UserUtils userUtils){
+    public MessagingServiceImpl(ConversationRepository conversationRepository,
+                                ClotheUtils clotheUtils, MessagingUtils messagingUtils, UserUtils userUtils, MessageRepository messageRepository){
         this.conversationRepository = conversationRepository;
         this.clotheUtils = clotheUtils;
         this.messagingUtils = messagingUtils;
         this.userUtils = userUtils;
+        this.messageRepository = messageRepository;
     }
 
     @Override
@@ -77,5 +83,27 @@ public class ConversationServiceImpl implements ConversationService {
         var conversation = messagingUtils.getConversation(buyerId, clotheId);
 
         return conversation.getMessages().stream().map(messagingUtils::mapToDto).toList();
+    }
+
+    @Override
+    @Transactional
+    public void sendMessage(long conversationId, String message, String email) {
+
+        var conversation = messagingUtils.getConversation(conversationId);
+
+        boolean isBuyer;
+        if(messagingUtils.isBuyer(conversation.getBuyer().getId(),conversation.getClothe().getId(), email))
+                        isBuyer = true;
+        else if (clotheUtils.isOwner(conversation.getClothe().getId(), email))
+                        isBuyer = false;
+        else throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+
+        var messageEntity = Message.builder()
+                .conversation(conversation)
+                .message(message)
+                .isBuyer(isBuyer)
+                .build();
+
+        messageRepository.save(messageEntity);
     }
 }

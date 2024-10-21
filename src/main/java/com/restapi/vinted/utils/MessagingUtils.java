@@ -24,21 +24,16 @@ public class MessagingUtils {
                 .orElseThrow( () -> new ResourceNotFoundException("Conversation", "buyerId or clotheId"));
     }
 
+    public Conversation getConversation(long conversationId){
+        return conversationRepository.findById(conversationId)
+                .orElseThrow( () -> new ResourceNotFoundException("Conversation", "id", conversationId));
+    }
+
     public boolean isBuyer(long buyerId, long clotheId, String email) {
         var conversation = getConversation(buyerId, clotheId);
         var currentUser = userUtils.getUser(email);
 
         return conversation.getBuyer().equals(currentUser);
-    }
-
-    public Message mapToEntity(MessageDto messageDto) {
-        return Message.builder()
-                .message(messageDto.getMessageContent())
-                .isBuyer(messageDto.getIsBuyer())
-                .conversation(conversationRepository
-                        .findByBuyerIdAndClotheId(
-                                messageDto.getBuyerId(),
-                                messageDto.getClotheId()).get()).build();
     }
 
     public ConversationDto mapToDto(Conversation conversation){

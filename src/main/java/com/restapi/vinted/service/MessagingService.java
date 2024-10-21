@@ -5,7 +5,7 @@ import com.restapi.vinted.payload.MessageDto;
 
 import java.util.List;
 
-public interface ConversationService {
+public interface MessagingService {
     void startConversation(long clotheId, String email);
 
     List<ConversationDto> getConversationsBuying(String email);
@@ -13,4 +13,6 @@ public interface ConversationService {
     List<MessageDto> getMessages(long buyerId, long clotheId, String email);
 
     List<ConversationDto> getConversationsSelling(long clotheId, String name);
+
+    void sendMessage(long conversationId, String message, String email);
 }
