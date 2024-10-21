@@ -56,10 +56,10 @@ public class ImageServiceImpl implements ImageService {
             deletedImages.forEach(this::deleteImage);
         }
 
-        if(clothe.getImages().size() + newImages.size() > 5)
+        if(newImages == null) return;
+        else if(clothe.getImages().size() + newImages.size() > 5)
             throw new ApiException(HttpStatus.BAD_REQUEST, Constant.IMAGES_VALIDATION_FAILED);
-
-        if (newImages != null && !newImages.isEmpty()) {
+        else if (newImages != null && !newImages.isEmpty()) {
             var newImageNames = newImages.stream().map(this::saveImage).toList();
             clothe.getImages().addAll(newImageNames);
         }

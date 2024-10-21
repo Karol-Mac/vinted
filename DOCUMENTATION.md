@@ -51,7 +51,7 @@ Baza danych jest automatycznie inicjalizowana jako komponent Docker <br>
 ## Przykładowe użycie aplikacji:
 
 ### Rejestracja i logowanie użytkownika
-Endpointy związane z rejestracją i logowaniem użytkownika są dostępne dla wszystkich użytkowników,
+Endpointy związane z rejestracją i logowaniem użytkownika są dostępne dla wszystkich użytkowników. <br>
 Dostępne są one w klasie [AuthController](src/main/java/com/restapi/vinted/controller/AuthController.java),
 który następnie przekazuje zapytanie do serwisu [AuthService](src/main/java/com/restapi/vinted/service/impl/AuthServiceimpl.java).
 1. Rejestracja nowego użytkownika:
@@ -106,13 +106,104 @@ w kodzie jest to klasa [RegisterDto](src/main/java/com/restapi/vinted/payload/Re
     ```
 
 ### Ubrania
-Endpointy związane z przeglądaniem oferty sklepu są dostępne dla wszystkich użytkowników,
-    ale tutaj skupimy się na operacjach dla zalogowanych użytkowników (np. pisaniu wiadomości do włąścicieli i edycji ubrań).
-Dostępne są one w klasie [ClotheController](src/main/java/com/restapi/vinted/controller/ClotheController.java),
-który następnie przekazuje zapytanie do serwisu [ClothesService](src/main/java/com/restapi/vinted/service/impl/ClothesServiceImpl.java).
+Endpointy związane z przeglądaniem oferty sklepu są dostępne dla wszystkich użytkowników, <br>
+    ale tutaj skupimy się na operacjach dla zalogowanych użytkowników (np. pisaniu wiadomości do włąścicieli i edycji ubrań). <br>
+Dostępne są one w klasie [ClotheController](src/main/java/com/restapi/vinted/controller/ClotheController.java),<br>
+który następnie przekazuje zapytanie do serwisu [ClothesService](src/main/java/com/restapi/vinted/service/impl/ClothesServiceImpl.java).<br>
 
-1. Pobranie wszystkich ubrań z danej kategorii:
+1. Pobranie wszystkich ubrań z danej kategorii:<br>
+    Akcja dostępna dla wszystkich użytkowników:
+    ```
+    curl --location 'http://localhost:8080/api/clothes/category/1'
+    ```
+    W przypadku poprawnego zapytania, otrzymamy odpowiedź z kodem 200 i listą ubrań w danej kategorii. <br>
+    W przypadku podania nieistniejącego ID, otrzymamy kod 404:
+   ```JSON
+   {
+       "timestamp": "2024-10-21T10:59:14.816+00:00",
+       "message": "Category not found with id = 11",
+       "details": "uri=/api/clothes/category/11"
+   }
+   ```
 
+2. Dodanie nowego ubrania:<br>
+    Akcja dostępna _tylko_ dla zalogowanych użytkowników: <br>
+    Dodawane jest na raz ubranie oraz jego zdjęcia (max 5). <br>
+    Reprezentacja dodawanego ubrania: [ClotheDto](src/main/java/com/restapi/vinted/payload/ClotheDto.java) <br>
+    Zdjęcie jest zapisywane na serwerze w folderze [images](src/main/resources/static/images). <br>
+    Podczas zapisywania do oryginalnej nazwy pliku dodawany jest UUID, aby uniknąć konfliktów. <br>
+   (Żeby pobrać zdjęcie należy użyć endpointu /api/images/{imageName})<br>
+    ```
+   curl --location 'http://localhost:8080/api/clothes' \
+    --header 'Authorization: Bearer {acces_token_generated_while_logging}' \
+    --form 'clothe="{
+    \"name\":\"Knit Hoodie\",
+    \"description\":\"Knit hoodie with a unique texture, perfect for fall\",
+    \"price\":55.50,
+    \"size\":\"M\",
+    \"categoryId\":3,
+    \"material\":\"cotton\"
+    }";type=application/json' \
+    --form 'images=@"Path_to_image_on_PC"' \
+    ```
+    W odpowiedzi otrzymamy kod 201 i informację o dodanym ubraniu:
+   ```JSON
+    {
+       "id": 7,
+       "name": "Knit Hoodie",
+       "description": "Knit hoodie with a unique texture, perfect for fall",
+       "price": 55.50,
+       "size": "M",
+       "images": [
+          "fe63ba83-1494-4735-8165-1d6d125cbd3f_biedronka.png"
+       ],
+       "createdAt": "2024-10-21T13:47:57.541917+02:00",
+       "updatedAt": "2024-10-21T13:47:57.542918+02:00",
+       "material": "cotton",
+       "views": 0,
+       "categoryId": 3,
+       "userId": 3,
+       "conversasations": [],
+       "available": false
+   }
+   ```
+       W przypadku niepoprawnego zapytania, otrzymamy kod i odpowiednią informację o błędzie
 
+3. Aktualizacja ubrania:<br>
+    Akcja dostępna _tylko_ dla zalogowanych użytkowników, ponadto użytkownik musi być **właścicielem** ubrania.<br>
+    Umożliwia zmianę danych ubrania oraz dodanie/usunięcie zdjęć - ich liczba cały czas musi być mniejsza niż 5.
+    ```
+   curl --location --request PUT 'http://localhost:8080/api/myclothes/3' \
+    --header 'Authorization: Bearer {acces_token_generated_while_logging}' \
+    --form 'newImages=@"path_to_new_image"' \
+    --form 'deletedImages="[\"image_name_to_be_removed\"]";type=application/json'
+    ```
+    Przykłądowa odpowiedź:
+    ```JSON
+   {
+      "id": 3,
+      "name": "Vintage Graphic T-Shirt",
+      "description": "Vintage-style graphic t-shirt for retro lovers",
+      "price": 18.50,
+      "size": "L",
+      "images": [],
+      "createdAt": "2024-10-21T00:00:00Z",
+      "updatedAt": "2024-10-21T00:00:00Z",
+      "material": null,
+      "views": 15,
+      "categoryId": 3,
+      "userId": 2,
+      "conversasations": [],
+      "available": true
+    }
+    ```
+4. usuwanie ubrania
+   Akcja dostępna _tylko_ dla zalogowanych użytkowników, ponadto użytkownik musi być **właścicielem** ubrania.<br>
+    ```
+   curl --location --request DELETE 'http://localhost:8080/api/clothes/3' \
+    --header 'Authorization: Bearer {acces_token_generated_while_logging}'
+    ```
+   W odpowiedzi otrzymamy kod 204, a ubranie zostanie oznaczony jako niedostępne.
+                                                             (available=false)
 
 ### Konwersacje
