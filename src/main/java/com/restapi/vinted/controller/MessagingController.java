@@ -3,16 +3,21 @@ package com.restapi.vinted.controller;
 import com.restapi.vinted.payload.ConversationDto;
 import com.restapi.vinted.payload.MessageDto;
 import com.restapi.vinted.service.MessagingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.security.Principal;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/conversations")
 public class MessagingController {
+    private static final Logger log = LoggerFactory.getLogger(MessagingController.class);
     private final MessagingService messagingService;
 
 
@@ -38,8 +43,8 @@ public class MessagingController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MessageDto>> getMessages(@RequestParam long buyerId, @RequestParam long clotheId, Principal principal) {
-        return ResponseEntity.ok(messagingService.getMessages(buyerId, clotheId, principal.getName()));
+    public ResponseEntity<List<MessageDto>> getMessages(@RequestParam long conversationId,  Principal principal) {
+        return ResponseEntity.ok(messagingService.getMessages(conversationId, principal.getName()));
     }
 
     @PostMapping("/send")
@@ -48,7 +53,20 @@ public class MessagingController {
                                             Principal principal) {
 
         messagingService.sendMessage(conversationId, message, principal.getName());
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return ResponseEntity.created(getLocation(conversationId)).build();
     }
 
+    //FIXME: change code to not requireing hard coded path
+    private URI getLocation(Object resourceId) {
+        var uri = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .replacePath("/api/conversations")
+                .replaceQueryParam("conversationId", resourceId)
+                .build()
+                .toUri();
+
+        log.error(uri.toString());
+
+        return uri;
+    }
 }
