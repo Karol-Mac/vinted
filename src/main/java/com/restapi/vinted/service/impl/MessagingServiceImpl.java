@@ -30,7 +30,7 @@ public class MessagingServiceImpl implements MessagingService {
     private final MessageRepository messageRepository;
 
     public MessagingServiceImpl(ConversationRepository conversationRepository,
-                                ClotheUtils clotheUtils, MessagingUtils messagingUtils, UserUtils userUtils, MessageRepository messageRepository){
+                                ClotheUtils clotheUtils, MessagingUtils messagingUtils, UserUtils userUtils, MessageRepository messageRepository) {
         this.conversationRepository = conversationRepository;
         this.clotheUtils = clotheUtils;
         this.messagingUtils = messagingUtils;
@@ -57,7 +57,7 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
     @Override
-    public List<ConversationDto> getConversationsBuying(String email){
+    public List<ConversationDto> getConversationsBuying(String email) {
 
         var buyer = userUtils.getUser(email);
         return conversationRepository.findByBuyerId(buyer.getId())
@@ -68,7 +68,7 @@ public class MessagingServiceImpl implements MessagingService {
 
     @Override
     @PreAuthorize("@clotheUtils.isOwner(#clotheId, #email)")
-    public List<ConversationDto> getConversationsSelling(long clotheId, String email){
+    public List<ConversationDto> getConversationsSelling(long clotheId, String email) {
         return conversationRepository.findByClotheId(clotheId)
                 .stream()
                 .map(messagingUtils::mapToDto)
@@ -76,11 +76,13 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
     @Override
-    public List<MessageDto> getMessages(long buyerId, long clotheId, String email){
-        if (!clotheUtils.isOwner(clotheId, email) && !messagingUtils.isBuyer(buyerId, clotheId, email))
-            throw new AccessDeniedException("You don't have permission to see this message");
+    public List<MessageDto> getMessages(long conversationId, String email) {
+        var conversation = messagingUtils.getConversation(conversationId);
 
-        var conversation = messagingUtils.getConversation(buyerId, clotheId);
+        if (!clotheUtils.isOwner(conversation.getClothe().getId(), email) &&
+            !messagingUtils.isBuyer(conversation, email))
+                throw new AccessDeniedException("You don't have permission to see this message");
+
 
         return conversation.getMessages().stream().map(messagingUtils::mapToDto).toList();
     }
@@ -92,10 +94,10 @@ public class MessagingServiceImpl implements MessagingService {
         var conversation = messagingUtils.getConversation(conversationId);
 
         boolean isBuyer;
-        if(messagingUtils.isBuyer(conversation.getBuyer().getId(),conversation.getClothe().getId(), email))
-                        isBuyer = true;
+        if (messagingUtils.isBuyer(conversation, email))
+            isBuyer = true;
         else if (clotheUtils.isOwner(conversation.getClothe().getId(), email))
-                        isBuyer = false;
+            isBuyer = false;
         else throw new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized");
 
         var messageEntity = Message.builder()

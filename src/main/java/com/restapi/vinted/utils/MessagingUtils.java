@@ -19,18 +19,12 @@ public class MessagingUtils {
         this.userUtils = userUtils;
     }
 
-    public Conversation getConversation(long buyedId, long clotheId){
-        return conversationRepository.findByBuyerIdAndClotheId(buyedId, clotheId)
-                .orElseThrow( () -> new ResourceNotFoundException("Conversation", "buyerId or clotheId"));
-    }
-
     public Conversation getConversation(long conversationId){
         return conversationRepository.findById(conversationId)
                 .orElseThrow( () -> new ResourceNotFoundException("Conversation", "id", conversationId));
     }
 
-    public boolean isBuyer(long buyerId, long clotheId, String email) {
-        var conversation = getConversation(buyerId, clotheId);
+    public boolean isBuyer(Conversation conversation, String email) {
         var currentUser = userUtils.getUser(email);
 
         return conversation.getBuyer().equals(currentUser);

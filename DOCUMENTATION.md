@@ -207,3 +207,15 @@ który następnie przekazuje zapytanie do serwisu [ClothesService](src/main/java
                                                              (available=false)
 
 ### Konwersacje
+Operacje związanie z konwersacjami są dostępne tylko **dla zalogowanych** użytkowników, <br>
+    endpointy związane z konwersacjami są dostępne w klasie [MessagingController](src/main/java/com/restapi/vinted/controller/MessagingController.java),<br>
+    która przekazuje zapytanie do serwisu [MessagingService](src/main/java/com/restapi/vinted/service/impl/MessagingServiceImpl.java).<br>
+
+    Logika tworzenia i operowania na konwersacjach może być myląca, ponieważ zakłada ona,
+    że kupujący (buyer) piszę do ubrania.
+    Tak na prawdę wiadomości są przesyłane do właściciela danego ubrania (owner).
+    Zaimplementowałem przesyłanie wiadomości w taki sposób, ponieważ możliwa jest sytuacja, w której
+    buyer kupuje kilka ubrań od jednego właściciela, wtedy powinno istnieć kilka oddzielnych konwersacji między nimi.
+
+1. Utworzenie nowej konwersacji:<br>
+    

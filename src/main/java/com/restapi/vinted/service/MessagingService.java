@@ -10,7 +10,7 @@ public interface MessagingService {
 
     List<ConversationDto> getConversationsBuying(String email);
 
-    List<MessageDto> getMessages(long buyerId, long clotheId, String email);
+    List<MessageDto> getMessages(long conversationId, String email);
 
     List<ConversationDto> getConversationsSelling(long clotheId, String name);
 
