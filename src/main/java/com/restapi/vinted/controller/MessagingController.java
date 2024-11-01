@@ -56,17 +56,15 @@ public class MessagingController {
         return ResponseEntity.created(getLocation(conversationId)).build();
     }
 
-    //FIXME: change code to not requireing hard coded path
     private URI getLocation(Object resourceId) {
         var uri = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .replacePath("/api/conversations")
-                .replaceQueryParam("conversationId", resourceId)
+                .fromCurrentContextPath()
+                .path("/api/conversations")
+                .queryParam("conversationId", resourceId)
                 .build()
                 .toUri();
 
-        log.error(uri.toString());
-
+        log.info("Generated URI: {}", uri);
         return uri;
     }
 }
