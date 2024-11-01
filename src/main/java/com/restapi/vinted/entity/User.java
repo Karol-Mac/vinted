@@ -45,4 +45,10 @@ public class User {
 
     @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL)
     private Set<Conversation> conversations;
+
+    @OneToMany(mappedBy = "buyer")
+    private Set<Order> orders;
+
+    @OneToMany(mappedBy = "seller")
+    private Set<Order> soldOrders;
 }

@@ -64,4 +64,7 @@ public class Clothe {
 
     @OneToMany(mappedBy = "clothe", cascade = CascadeType.ALL)
     private List<Conversation> conversations;
+
+    @OneToOne(mappedBy = "clothe")
+    private Order order;
 }
