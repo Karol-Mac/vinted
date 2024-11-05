@@ -54,4 +54,8 @@ public class User {
 
     @OneToMany(mappedBy = "seller")
     private Set<Order> soldOrders;
+
+    public User(String email) {
+        this.email = email;
+    }
 }

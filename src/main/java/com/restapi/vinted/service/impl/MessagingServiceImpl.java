@@ -57,20 +57,19 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ConversationDto> getConversationsBuying(String email) {
-
-        var buyer = userUtils.getUser(email);
-        return conversationRepository.findByBuyerId(buyer.getId())
-                .stream()
+        return conversationRepository.findByBuyerEmail(email)
+//                .stream()
                 .map(messagingUtils::mapToDto)
                 .toList();
     }
 
     @Override
     @PreAuthorize("@clotheUtils.isOwner(#clotheId, #email)")
+    @Transactional(readOnly = true)
     public List<ConversationDto> getConversationsSelling(long clotheId, String email) {
         return conversationRepository.findByClotheId(clotheId)
-                .stream()
                 .map(messagingUtils::mapToDto)
                 .toList();
     }
@@ -80,8 +79,10 @@ public class MessagingServiceImpl implements MessagingService {
         var conversation = messagingUtils.getConversation(conversationId);
         var currentUser = userUtils.getUser(email);
 
-        if(conversation.getBuyer().getId() != currentUser.getId() &&
-            conversation.getClothe().getUser().getId() != currentUser.getId())
+        boolean isAuthorized = conversation.getBuyer().getId() == currentUser.getId() ||
+                clotheUtils.isOwner(conversation.getClothe().getId(), email);
+
+        if (!isAuthorized)
             throw new AccessDeniedException("You don't have permission to see this message");
 
         return conversation.getMessages().stream().map(messagingUtils::mapToDto).toList();
