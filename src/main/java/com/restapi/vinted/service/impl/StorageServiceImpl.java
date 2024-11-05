@@ -43,6 +43,9 @@ public class StorageServiceImpl implements StorageService {
 
         var clothe = clotheUtils.getClotheFromDB(clotheId);
 
+        if(clotheUtils.isOwner(clothe.getId(), email))
+                throw new ApiException(HttpStatus.BAD_REQUEST, "You can't add your own clothe to storage");
+
         storage.getClothes().add(clothe);
         storageRepository.save(storage);
     }
