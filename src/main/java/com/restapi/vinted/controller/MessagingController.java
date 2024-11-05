@@ -17,7 +17,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/conversations")
 public class MessagingController {
-    private static final Logger log = LoggerFactory.getLogger(MessagingController.class);
     private final MessagingService messagingService;
 
 
@@ -56,15 +55,12 @@ public class MessagingController {
         return ResponseEntity.created(getLocation(conversationId)).build();
     }
 
-    private URI getLocation(Object resourceId) {
-        var uri = ServletUriComponentsBuilder
-                .fromCurrentContextPath()
-                .path("/api/conversations")
-                .queryParam("conversationId", resourceId)
+    public URI getLocation(Object resourceId) {
+        return ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .replacePath("/api/conversations")
+                .replaceQueryParam("conversationId", resourceId)
                 .build()
                 .toUri();
-
-        log.info("Generated URI: {}", uri);
-        return uri;
     }
 }

@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Set;
 
 @Service
-public class AuthServiceimpl implements AuthService {
+public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
@@ -34,7 +34,7 @@ public class AuthServiceimpl implements AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserUtils userUtils;
 
-    public AuthServiceimpl(AuthenticationManager authenticationManager, UserRepository userRepository,
+    public AuthServiceImpl(AuthenticationManager authenticationManager, UserRepository userRepository,
                            RoleRepository roleRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider, UserUtils userUtils) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;

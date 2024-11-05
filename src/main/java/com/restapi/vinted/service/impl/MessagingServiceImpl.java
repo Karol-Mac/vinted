@@ -78,11 +78,11 @@ public class MessagingServiceImpl implements MessagingService {
     @Override
     public List<MessageDto> getMessages(long conversationId, String email) {
         var conversation = messagingUtils.getConversation(conversationId);
+        var currentUser = userUtils.getUser(email);
 
-        if (!clotheUtils.isOwner(conversation.getClothe().getId(), email) &&
-            !messagingUtils.isBuyer(conversation, email))
-                throw new AccessDeniedException("You don't have permission to see this message");
-
+        if(conversation.getBuyer().getId() != currentUser.getId() &&
+            conversation.getClothe().getUser().getId() != currentUser.getId())
+            throw new AccessDeniedException("You don't have permission to see this message");
 
         return conversation.getMessages().stream().map(messagingUtils::mapToDto).toList();
     }

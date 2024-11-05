@@ -53,7 +53,7 @@ Baza danych jest automatycznie inicjalizowana jako komponent Docker <br>
 ### Rejestracja i logowanie użytkownika
 Endpointy związane z rejestracją i logowaniem użytkownika są dostępne dla wszystkich użytkowników. <br>
 Dostępne są one w klasie [AuthController](src/main/java/com/restapi/vinted/controller/AuthController.java),
-który następnie przekazuje zapytanie do serwisu [AuthService](src/main/java/com/restapi/vinted/service/impl/AuthServiceimpl.java).
+który następnie przekazuje zapytanie do serwisu [AuthService](src/main/java/com/restapi/vinted/service/impl/AuthServiceImpl.java).
 1. Rejestracja nowego użytkownika:
    ```
    curl --location 'http://localhost:8080/api/auth/register' \
@@ -218,4 +218,84 @@ Operacje związanie z konwersacjami są dostępne tylko **dla zalogowanych** uż
     buyer kupuje kilka ubrań od jednego właściciela, wtedy powinno istnieć kilka oddzielnych konwersacji między nimi.
 
 1. Utworzenie nowej konwersacji:<br>
+    Rozpoczęcie konwersacji z konkretnym 'ubraniem' (właścicielem ubrania)
+    ```
+   curl --location --request POST 'http://localhost:8080/api/conversations?clotheId=3' \
+    --header 'Authorization: Bearer {acces_token_generated_while_logging}'
+   ```
+   W przypadku prawidłowego zapytania, otrzymamy kod 204, <br>
+    Właściciel nie może rozpocząć konwersacji z samym sobą, skutkuje to błędem:
+    ```JSON
+   {
+      "timestamp": "2024-10-22T09:02:12.197+00:00",
+      "message": "We dont't talk to ourselves",
+      "details": "uri=/api/conversations"
+   }
+    ```
+   
+2. Wyświetlenie listy konwersacji jako kupujący:<br>
+    Wyświetlenie konwersacji, w których kupujący jest uczestnikiem
+    ```
+    curl --location 'http://localhost:8080/api/conversations/buying' \
+   --header 'Authorization: Bearer {acces_token_generated_while_logging}'
+   ```
+   Przykładowa prawidłowa odpowiedź:
+    ```JSON
+    [
+      {
+          "id": 1,
+          "buyerId": 3,
+          "clotheId": 1
+      }
+    ]
+    ```
+
+3. Wyświetlenie _faktycznej_ konwersacji (listy wiadomości): 
+    ```
+   curl --location 'http://localhost:8080/api/conversations?conversationId=1' \
+    --header 'Authorization: Bearer {acces_token_generated_while_logging}'
+   ```
+   Przy prawidłowym zapytaniu: 
+   ```JSON
+    [
+       {
+        "buyerId": 3,
+        "clotheId": 1,
+        "messageContent": "Hello, I would like to buy this T-Shirt, but half the price",
+        "isBuyer": true
+       },
+       {
+        "buyerId": 3,
+        "clotheId": 1,
+        "messageContent": "No, I won't sold it for 10$",
+        "isBuyer": false
+       }
+    ]
+   ```
+   W przypadku, gdy osoba niebędąca kupującym/sprzedawcą będzie chciała sprawdzić konwersację, otrzyma błąd:
+   ```JSON
+   {
+       "timestamp": "2024-10-22T09:02:12.197+00:00",
+       "message": "You don't have permission to see this message",
+       "details": "uri=/api/conversations?conversationId=1"
+   }
+   ```
+   
+4. Wysłanie nowej wiadomości:
+    ```
+   curl --location --request POST 'http://localhost:8080/api/conversations/send?conversationId=1' \
+    --header 'Authorization: Bearer {acces_token_generated_while_logging}' \
+   ```
+    W odpowiedzi otrzymamy kod 200, a wiadomość zostanie dodana do konwersacji. <br>
+    Podczas wysyłania wiadomości sprawdzane są uprawnienia użytkownika, <br>
+    oraz ustawiane jest pole isBuyer na podstawie tego, czy użytkownik jest kupującym czy właścicielem ubrania. <br>
+    Pole to jest wykorzystywane do wyświetlania wiadomości w odpowiednim miejscu (podczas tworzenia cztu na front-endzie)
     
+    W headerze odpowiedzi dodana jest sekcja Location, która zawiera link do konwersacji:
+    Location: `http://localhost:8080/api/conversations?conversationId=1`
+
+## Testy
+Przykłądowe testy jednostkowe znajdują się w folderze testowym [test](src/test/java/com/restapi/vinted).<br>
+
+komenda do uruchomienia testów:
+`./mvnw test`
