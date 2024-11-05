@@ -49,6 +49,9 @@ public class User {
     @OneToMany(mappedBy = "buyer")
     private Set<Order> orders;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Storage storage;
+
     @OneToMany(mappedBy = "seller")
     private Set<Order> soldOrders;
 }
