@@ -3,13 +3,11 @@ package com.restapi.vinted.utils;
 import com.restapi.vinted.entity.Category;
 import com.restapi.vinted.entity.Clothe;
 import com.restapi.vinted.entity.Conversation;
-import com.restapi.vinted.exception.ApiException;
 import com.restapi.vinted.exception.ResourceNotFoundException;
 import com.restapi.vinted.payload.ClotheDto;
 import com.restapi.vinted.payload.ClotheResponse;
 import com.restapi.vinted.repository.ClotheRepository;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,30 +17,27 @@ import java.util.ArrayList;
 public class ClotheUtils {
 
     private final ClotheRepository clotheRepository;
-    private final UserUtils userUtils;
 
-    public ClotheUtils(ClotheRepository clotheRepository, UserUtils userUtils) {
+    public ClotheUtils(ClotheRepository clotheRepository) {
         this.clotheRepository = clotheRepository;
-        this.userUtils = userUtils;
     }
 
 
     @Transactional(readOnly = true)
-    public boolean isOwner(long clotheId, String email){
+    public boolean isOwner(long clotheId, String email) {
         var clothe = getClotheFromDB(clotheId);
-        var user = userUtils.getUser(email);
-        if (!clothe.getUser().equals(user))
-            throw new ApiException(HttpStatus.FORBIDDEN, Constant.NOT_OWNER);
-        return true;
+        var allClothes = clotheRepository.findByUserEmail(email);
+
+        return allClothes.contains(clothe);
     }
 
-    public Clothe getClotheFromDB(long id){
+    public Clothe getClotheFromDB(long id) {
         return clotheRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Clothe", "id", id)
         );
     }
 
-    public ClotheResponse getClotheResponse(int pageNo, int pageSize, Page<Clothe> clothes){
+    public ClotheResponse getClotheResponse(int pageNo, int pageSize, Page<Clothe> clothes) {
         ClotheResponse clotheResponse = new ClotheResponse();
 
         clotheResponse.setClothes(clothes.stream().map(this::mapToDto).toList());
@@ -53,7 +48,7 @@ public class ClotheUtils {
         return clotheResponse;
     }
 
-    public Clothe mapToEntity(ClotheDto clotheDto){
+    public Clothe mapToEntity(ClotheDto clotheDto) {
         return Clothe.builder()
                 .name(clotheDto.getName())
                 .description(clotheDto.getDescription())
@@ -69,8 +64,8 @@ public class ClotheUtils {
 
     public ClotheDto mapToDto(Clothe clothe) {
         var conversations = clothe.getConversations() != null ?
-                        clothe.getConversations().stream().map(Conversation::getId).toList() :
-                        new ArrayList<Long>();
+                clothe.getConversations().stream().map(Conversation::getId).toList() :
+                new ArrayList<Long>();
 
         return ClotheDto.builder()
                 .id(clothe.getId())
