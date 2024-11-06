@@ -3,8 +3,6 @@ package com.restapi.vinted.controller;
 import com.restapi.vinted.payload.ConversationDto;
 import com.restapi.vinted.payload.MessageDto;
 import com.restapi.vinted.service.MessagingService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,7 +40,7 @@ public class MessagingController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MessageDto>> getMessages(@RequestParam long conversationId,  Principal principal) {
+    public ResponseEntity<List<MessageDto>> getMessages(@RequestParam long conversationId, Principal principal) {
         return ResponseEntity.ok(messagingService.getMessages(conversationId, principal.getName()));
     }
 
