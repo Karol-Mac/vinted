@@ -6,14 +6,19 @@
    -[x] dodanie licznika ubrań w kategorii i licznika wyświetleń w ubraniu
    - [x] konwersacje między użytkownikami
        -[x] utwórz encję konwersacji i wiadomości
-       - [x] zaimplementuj logikę (brak usuówania - nie widzę sensu tej funkcji)
+       -[x] zaimplementuj logikę (brak usuówania - nie widzę sensu tej funkcji)
+       -[ ] zastanów się co robić z konwersacjami ubrań, które zostały sprzedane:
+        (jak na razie w teorii można w nich pisać <- nie można tylko zacząć konwersacji ze sprzedanym ubraniem)
+         - po prostu usunąć 
+         - zostawić, ale zablokować możliwość wysyłania wiadomości
+       
 
-  -[ ] dodanie zamówień
-    -[ ] dodaj encję Order i Cart.
-            Cart (koszyk) będzie przechowywał ubrania, które użytkownik chcę zakupić
+  -[x] dodanie zamówień
+    -[x] dodaj encję Order i Storage.
+            Storage będzie przechowywał ubrania, które użytkownik chcę zakupić
             Order, to reprezentacja pojedynczego zamówienia - 1 sprzedawca, 1 kupujący
             W momencie kupienia wszystkich ubrań w koszyku tworzone jest kilka zamówień (sprawdź czy się da)
-    
+
     -[ ] połącz się z dostawcą płatności: Adyen/Stripe/PayU <- możliwe, że są tam jakieś opłaty
     
     -[ ] wysyłanie powiadomienia do sprzedawcy po zakupie jego ubrania

@@ -40,13 +40,15 @@ public class MessagingServiceImpl implements MessagingService {
 
     @Override
     @Transactional
-    public void startConversation(long clotheId, String email){
+    public void startConversation(long clotheId, String email) {
         var clothe = clotheUtils.getClotheFromDB(clotheId);
 
         var buyer = userUtils.getUser(email);
 
-        if(clothe.getUser().getId() == buyer.getId())
+        if (clothe.getUser().getId() == buyer.getId())
             throw new AccessDeniedException("We dont't talk to ourselves");
+        else if (!clothe.isAvailable())
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Clothe is not available");
 
         var conversation = Conversation.builder()
                 .buyer(buyer)
@@ -60,7 +62,6 @@ public class MessagingServiceImpl implements MessagingService {
     @Transactional(readOnly = true)
     public List<ConversationDto> getConversationsBuying(String email) {
         return conversationRepository.findByBuyerEmail(email)
-//                .stream()
                 .map(messagingUtils::mapToDto)
                 .toList();
     }
