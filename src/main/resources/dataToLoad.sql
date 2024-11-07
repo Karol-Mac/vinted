@@ -41,7 +41,7 @@ INSERT INTO clothes (name, description, price, size, created_at, updated_at, mat
 INSERT INTO clothes (name, description, price, size, created_at, updated_at, material, views, category_id, user_id, is_available)
             VALUES ('Blouse', 'White elegant blouse', 39.99, 'L', DATE(NOW()), DATE(NOW()), 'Cotton', 8, 5, 2, false);
 INSERT INTO clothes (name, description, price, size, created_at, updated_at, material, views, category_id, user_id, is_available)
-            VALUES ('White T-Shirt', 'Comfortable cotton t-shirt', 24.99, 'M', DATE(NOW()), DATE(NOW()), 'Cotton', 10, 1, 2, true);
+            VALUES ('White T-Shirt', 'Comfortable cotton t-shirt', 24.99, 'M', DATE(NOW()), DATE(NOW()), 'Cotton', 10, 1, 2, false);
 
 insert into conversations (buyer_id, clothe_id) values (3, 1);
 

@@ -20,5 +20,5 @@ public interface ClothesService {
 
     ClotheDto updateClothe(long id, ClotheDto clotheDto,
                            List<MultipartFile> newImages, List<String> deletedImages, String email);
-    String deleteClothe(long id, String email);
+    void deleteClothe(long id, String email);
 }

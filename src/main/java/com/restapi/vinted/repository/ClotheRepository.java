@@ -8,7 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ClotheRepository extends JpaRepository<Clothe, Long> {
-    Page<Clothe> findByCategoryId(long categoryId, Pageable pageable);
+
+    Page<Clothe> findByCategoryIdAndIsAvailableTrue(long categoryId, Pageable pageable);
+
     Page<Clothe> findByUserId(long userId, Pageable pageable);
 
     List<Clothe> findByUserEmail(String email);
